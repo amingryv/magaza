@@ -4,6 +4,7 @@ import { serveImage } from "./images";
 import { getBootstrap, getCategories, getPage, getProduct, getStore, listFilters, listProducts } from "./catalog";
 import { injectShop, rootRedirect } from "./html";
 import { createOrder } from "./orders";
+import * as A from "./admin";
 
 const router = new Router()
   // Health check: confirms the Worker runs and the migrations reached D1.
@@ -19,7 +20,21 @@ const router = new Router()
   .get("/api/attributes/filters", listFilters)
   .get("/api/pages/:slug", getPage)
   .post("/api/orders", createOrder)
-  .get("/images/*key", serveImage);
+  .get("/images/*key", serveImage)
+  // admin
+  .get("/api/admin/setup-status", A.setupStatus)
+  .post("/api/admin/setup", A.setup)
+  .post("/api/admin/login", A.login)
+  .post("/api/admin/logout", A.logout)
+  .post("/api/admin/password", A.changePassword)
+  .get("/api/admin/settings", A.getSettings)
+  .put("/api/admin/settings", A.putSettings)
+  .post("/api/admin/sector", A.applySector)
+  .post("/api/admin/telegram/token", A.telegramToken)
+  .post("/api/admin/telegram/connect", A.telegramConnect)
+  .post("/api/admin/telegram/test", A.telegramTest)
+  .post("/api/admin/upload", A.upload)
+  .delete("/api/admin/upload/*key", A.deleteUpload);
 
 export default {
   async fetch(req, env, exec): Promise<Response> {
