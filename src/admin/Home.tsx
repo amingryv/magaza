@@ -1,33 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { call, type SettingsRes } from "./api";
-import { Notice, PasswordField, Screen, Spinner, useAction } from "./ui";
+import { useState } from "react";
+import { call } from "./api";
+import { Notice, PasswordField, Spinner, useAction } from "./ui";
 
-/** Panel home. Orders, products and the rest arrive in the next phases. */
-export function Home({ version, onLogout }: { version: string; onLogout: () => void }) {
-  const [name, setName] = useState("");
-  useEffect(() => {
-    call<SettingsRes>("GET", "settings")
-      .then((r) => setName(String(r.settings["store.name"] ?? "")))
-      .catch(() => {});
-  }, []);
+/** Account section: password change, version, logout. */
+export function Account({ version, onLogout }: { version: string; onLogout: () => void }) {
   const out = useAction();
-
   return (
-    <Screen>
-      <header className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[0.85rem] font-medium text-ink-soft">İdarə paneli</p>
-          <h1 className="truncate text-[1.8rem]">{name || " "}</h1>
-        </div>
-        <a href="/" target="_blank" className="pill pill-soft h-10 shrink-0 px-4 text-[0.88rem]">
-          Mağazaya bax
-        </a>
-      </header>
-
-      <section className="mt-8 rounded-[20px] bg-paper-2 p-5">
-        <h2 className="text-[1.15rem]">Hesab</h2>
+    <div className="mx-auto w-full max-w-[30rem] px-4">
+      <section className="rounded-[20px] bg-paper-2 p-5">
+        <h2 className="text-[1.15rem]">Şifrəni dəyiş</h2>
         <PasswordForm />
       </section>
 
@@ -44,7 +27,7 @@ export function Home({ version, onLogout }: { version: string; onLogout: () => v
           Çıxış
         </button>
       </div>
-    </Screen>
+    </div>
   );
 }
 

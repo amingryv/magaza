@@ -88,7 +88,7 @@ export function imageUrl(key: string): string {
 }
 
 /** Uploads store a small copy beside each picture: products/<id>.webp → products/<id>_thumb.webp */
-function thumbUrl(key: string): string {
+export function thumbUrl(key: string): string {
   if (key.startsWith("products/") && key.endsWith(".webp") && !key.endsWith("_thumb.webp")) {
     return imageUrl(key.replace(/\.webp$/, "_thumb.webp"));
   }

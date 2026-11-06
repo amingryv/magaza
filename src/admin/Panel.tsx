@@ -1,0 +1,109 @@
+"use client";
+
+import { createContext, useContext, useEffect, useState } from "react";
+import { call, type SettingsRes } from "./api";
+import { Account } from "./Home";
+import { Products } from "./Products";
+import { ProductForm } from "./ProductForm";
+import { Categories } from "./Categories";
+import { Attributes } from "./Attributes";
+
+/*
+ * The panel after login. One page (/admin), sections chosen by the hash so
+ * the static export needs no extra routes and the back button works:
+ *   #/products  #/products/new  #/products/<id>  #/categories  #/attributes  #/account
+ */
+
+export type Shop = { name: string; main: string; languages: string[]; symbol: string };
+const ShopCtx = createContext<Shop>({ name: "", main: "az", languages: ["az"], symbol: "₼" });
+export const useShop = () => useContext(ShopCtx);
+
+export function go(hash: string) {
+  window.location.hash = hash;
+}
+
+function useHash(): string[] {
+  const read = () => window.location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
+  const [h, setH] = useState<string[]>([]);
+  useEffect(() => {
+    const on = () => {
+      setH(read());
+      window.scrollTo({ top: 0 });
+    };
+    on();
+    window.addEventListener("hashchange", on);
+    return () => window.removeEventListener("hashchange", on);
+  }, []);
+  return h;
+}
+
+const TABS = [
+  ["products", "Məhsullar"],
+  ["categories", "Kateqoriyalar"],
+  ["attributes", "Xüsusiyyətlər"],
+  ["account", "Hesab"],
+] as const;
+
+export function Panel({ version, onLogout }: { version: string; onLogout: () => void }) {
+  const [shop, setShop] = useState<Shop>({ name: "", main: "az", languages: ["az"], symbol: "₼" });
+  const route = useHash();
+  const section = route[0] ?? "products";
+
+  useEffect(() => {
+    call<SettingsRes>("GET", "settings")
+      .then(({ settings: s }) => {
+        const main = typeof s["store.language"] === "string" ? (s["store.language"] as string) : "az";
+        const langs = Array.isArray(s["store.languages"]) ? (s["store.languages"] as string[]) : [main];
+        const name = s["store.name"];
+        setShop({
+          name: typeof name === "string" ? name : name && typeof name === "object" ? String(Object.values(name)[0] ?? "") : "",
+          main,
+          languages: langs.includes(main) ? langs : [main, ...langs],
+          symbol: String(s["store.currency_symbol"] ?? "₼"),
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  const editing = section === "products" && route[1];
+
+  return (
+    <ShopCtx.Provider value={shop}>
+      <div className="min-h-dvh pb-16">
+        {!editing && (
+          <header className="mx-auto w-full max-w-[46rem] px-4 pt-6 md:pt-10">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[0.85rem] font-medium text-ink-soft">İdarə paneli</p>
+                <h1 className="truncate text-[1.6rem]">{shop.name || " "}</h1>
+              </div>
+              <a href="/" target="_blank" className="pill pill-soft h-10 shrink-0 px-4 text-[0.88rem]">
+                Mağazaya bax
+              </a>
+            </div>
+            <nav className="no-scrollbar -mx-4 mt-5 flex gap-1.5 overflow-x-auto px-4" aria-label="Bölmələr">
+              {TABS.map(([id, label]) => (
+                <a
+                  key={id}
+                  href={`#/${id}`}
+                  aria-current={section === id ? "page" : undefined}
+                  className={`inline-flex h-10 shrink-0 items-center rounded-full px-4 text-[0.9rem] font-medium transition-colors ${section === id ? "bg-ink text-paper" : "bg-paper-2 text-ink hover:bg-paper-3"}`}
+                >
+                  {label}
+                </a>
+              ))}
+            </nav>
+          </header>
+        )}
+
+        <div className={editing ? "" : "mt-6"}>
+          {section === "products" && !route[1] && <Products />}
+          {editing && <ProductForm key={route[1]} id={route[1] === "new" ? null : Number(route[1])} />}
+          {section === "categories" && <Categories />}
+          {section === "attributes" && <Attributes />}
+          {section === "account" && <Account version={version} onLogout={onLogout} />}
+        </div>
+      </div>
+    </ShopCtx.Provider>
+  );
+}

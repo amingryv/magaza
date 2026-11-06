@@ -7,7 +7,7 @@ import type { ApiStore, FormField, Lang, Text } from "./api-types";
  * Nothing here is shop-specific.
  */
 /** Code version, shown in the admin panel; bump it with CHANGELOG.md. */
-export const APP_VERSION = "0.5.0";
+export const APP_VERSION = "0.6.0";
 
 export const DEFAULT_FORM_FIELDS: FormField[] = [
   { key: "name", visible: true, required: true },

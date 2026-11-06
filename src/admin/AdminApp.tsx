@@ -5,7 +5,7 @@ import { call, type Status } from "./api";
 import { Screen, Spinner } from "./ui";
 import { Login } from "./Login";
 import { Setup } from "./Setup";
-import { Home } from "./Home";
+import { Panel } from "./Panel";
 
 /**
  * /admin decides what to show from /api/admin/setup-status:
@@ -47,5 +47,5 @@ export function AdminApp() {
   if (!status.admin) return <Setup fresh completed={status.completed} onDone={refresh} />;
   if (!status.logged_in) return <Login onDone={refresh} />;
   if (!status.completed) return <Setup fresh={false} completed={false} onDone={refresh} />;
-  return <Home version={status.version} onLogout={refresh} />;
+  return <Panel version={status.version} onLogout={refresh} />;
 }

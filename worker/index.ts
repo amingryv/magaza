@@ -5,6 +5,7 @@ import { getBootstrap, getCategories, getPage, getProduct, getStore, listFilters
 import { injectShop, rootRedirect } from "./html";
 import { createOrder } from "./orders";
 import * as A from "./admin";
+import * as C from "./admin-catalog";
 
 const router = new Router()
   // Health check: confirms the Worker runs and the migrations reached D1.
@@ -34,7 +35,24 @@ const router = new Router()
   .post("/api/admin/telegram/connect", A.telegramConnect)
   .post("/api/admin/telegram/test", A.telegramTest)
   .post("/api/admin/upload", A.upload)
-  .delete("/api/admin/upload/*key", A.deleteUpload);
+  .delete("/api/admin/upload/*key", A.deleteUpload)
+  .get("/api/admin/categories", C.listCategories)
+  .post("/api/admin/categories", C.createCategory)
+  .post("/api/admin/categories/reorder", C.reorder("categories"))
+  .put("/api/admin/categories/:id", C.updateCategory)
+  .delete("/api/admin/categories/:id", C.deleteCategory)
+  .get("/api/admin/attributes", C.listAttributes)
+  .post("/api/admin/attributes", C.createAttribute)
+  .post("/api/admin/attributes/reorder", C.reorder("attributes"))
+  .put("/api/admin/attributes/:id", C.updateAttribute)
+  .delete("/api/admin/attributes/:id", C.deleteAttribute)
+  .get("/api/admin/products", C.listAdminProducts)
+  .post("/api/admin/products", C.createProduct)
+  .post("/api/admin/products/bulk", C.bulkProducts)
+  .get("/api/admin/products/:id", C.getAdminProduct)
+  .put("/api/admin/products/:id", C.updateProduct)
+  .delete("/api/admin/products/:id", C.deleteProduct)
+  .post("/api/admin/products/:id/copy", C.copyProduct);
 
 export default {
   async fetch(req, env, exec): Promise<Response> {
