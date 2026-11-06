@@ -1,0 +1,38 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // One Worker serves the shop front (static assets from `out/`), the JSON API
+  // and the R2 images. Resource IDs are left out on purpose: the
+  // "Deploy to Cloudflare" button creates a new D1 database and R2 bucket in
+  // the owner's own account and fills them in.
+  "name": "magaza",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-11-06",
+
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    // The Worker runs for the API, images and every page (it writes the shop's
+    // name, colours and SEO tags into the HTML). Hashed build files skip it
+    // and never cost a Worker invocation.
+    "run_worker_first": ["/*", "!/_next/static/*", "!/favicon.ico"],
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "magaza-db",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  "r2_buckets": [
+    {
+      "binding": "IMAGES",
+      "bucket_name": "magaza-images"
+    }
+  ],
+
+  "observability": { "enabled": true }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "magaza",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && node scripts/flatten-rsc.mjs",
+    "preview": "npm run build && npm run db:migrate:local && wrangler dev",
+    "worker:dev": "node -e \"require('fs').mkdirSync('out',{recursive:true})\" && wrangler dev",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p worker",
+    "cf-typegen": "wrangler types",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrations:apply": "wrangler d1 migrations apply DB --remote",
+    "deploy": "npm run db:migrations:apply && wrangler deploy",
+    "db:seed:local": "node scripts/seed-demo.mts"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter-tight": "^5.3.0",
+    "motion": "^14.9.1",
+    "next": "16.4.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.5",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "wrangler": "^4.158.0"
+  },
+  "allowScripts": {
+    "workerd@1.20261104.1": true,
+    "esbuild@0.28.2": true,
+    "sharp@0.35.5": true
+  },
+  "cloudflare": {
+    "bindings": {
+      "DB": {
+        "description": "Mağazanın verilənlər bazası: məhsullar, kateqoriyalar, sifarişlər, ayarlar. Adı istəyə görə dəyişmək olar."
+      },
+      "IMAGES": {
+        "description": "Məhsul şəkilləri, logo və bannerlər üçün yaddaş. Adı istəyə görə dəyişmək olar."
+      }
+    }
+  }
+}
