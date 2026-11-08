@@ -52,7 +52,7 @@ npm run build
 npm run deploy     # = node scripts/deploy.mjs
 ```
 
-`scripts/deploy.mjs` əvvəl `wrangler d1 migrations apply DB --remote`, sonra `wrangler deploy` işlədir (yeni kod köhnə sxemlə qarşılaşmır). Baza hələ yoxdursa (ilk deploy), əvvəl `wrangler deploy` (D1 və R2-ni yaradır, ID-ləri `wrangler.jsonc`-yə yazır), sonra migration. Yaranan ID-ləri commit et ki, növbəti deploy eyni bazanı tapsın.
+`scripts/deploy.mjs` əvvəl `wrangler d1 migrations apply DB --remote`, sonra `wrangler deploy` işlədir (yeni kod köhnə sxemlə qarşılaşmır). Baza hələ yoxdursa (ilk deploy), əvvəl `wrangler deploy` (D1 və R2-ni yaradır), sonra migration. ID-lər `wrangler.jsonc`-yə yazılmır; növbəti deploy-lar bazanı və bucket-i adla (`magaza-db`, `magaza-images`) tapır, ona görə bu adları dəyişmə. Təmiz hesabda sınanıb (2026-11-09).
 
 Gizli açar (secret) yoxdur: Telegram tokeni və digər ayarlar admin paneldən D1-ə yazılır.
 
