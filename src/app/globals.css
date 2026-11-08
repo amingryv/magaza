@@ -424,6 +424,20 @@ input[type="search"]::-webkit-search-cancel-button {
       gap: 2.5rem 1.5rem;
     }
   }
+  /* theme.layout = "list": bigger cards, one per row on a phone */
+  html[data-layout="list"] .grid-products {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 640px) {
+    html[data-layout="list"] .grid-products {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    html[data-layout="list"] .grid-products {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
   .grid-item {
     min-width: 0;
     animation: rise 0.5s var(--curve) calc(var(--i, 0) * 35ms) both;

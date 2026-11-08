@@ -19,7 +19,9 @@ export type StoreSettings = {
   hours: LocalText;
   mapUrl: string;
   socials: { instagram?: string; tiktok?: string; facebook?: string };
-  theme: { paper: string; ink: string; accent: string };
+  theme: { paper: string; ink: string; accent: string; font: string; layout: "grid" | "list" };
+  banners: { image: string; title: LocalText; subtitle: LocalText; link: string }[];
+  featuredCategoryIds: number[];
   orders: { enabled: boolean; minAmount: number; deliveryNote: LocalText; formFields: FormField[] };
   whatsappButton: boolean;
 };
@@ -63,7 +65,11 @@ export function adaptStore(s: ApiStore): StoreSettings {
       tiktok: s.contact.tiktok || undefined,
       facebook: s.contact.facebook || undefined,
     },
-    theme: { paper: s.theme.paper, ink: s.theme.primary, accent: s.theme.secondary },
+    theme: { paper: s.theme.paper, ink: s.theme.primary, accent: s.theme.secondary, font: s.theme.font, layout: s.theme.layout },
+    banners: s.home.banners
+      .filter((b) => b && typeof b.image === "string" && b.image)
+      .map((b) => ({ image: b.image, title: localText(b.title, m), subtitle: localText(b.subtitle, m), link: typeof b.link === "string" ? b.link : "" })),
+    featuredCategoryIds: s.home.featured_category_ids,
     orders: {
       enabled: s.orders.enabled,
       minAmount: s.orders.min_amount,

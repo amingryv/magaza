@@ -16,6 +16,8 @@ export function HomeView() {
   return (
     <>
       <Hero />
+      <Banners />
+      <FeaturedCategories />
       <Shop />
       <HowItGoes />
       <Picks />
@@ -49,6 +51,71 @@ function Hero() {
         <span className="truncate">{t.home.searchPh}</span>
         <kbd className="hero-search-go">{t.home.searchGo}</kbd>
       </button>
+    </section>
+  );
+}
+
+/* ---------- banners: the owner's pictures, a swipeable row ---------- */
+
+function Banners() {
+  const { store, lang, href } = useSite();
+  if (!store.banners.length) return null;
+  const one = store.banners.length === 1;
+  return (
+    <section aria-label="Banners" className="wrap mb-12 md:mb-16">
+      <div className={`no-scrollbar -mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 md:mx-0 md:px-0 ${one ? "" : "md:grid md:grid-cols-2"}`}>
+        {store.banners.map((b, i) => {
+          const title = tr(b.title, lang);
+          const sub = tr(b.subtitle, lang);
+          const body = (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={b.image} alt={title} className="aspect-[16/9] w-full rounded-[22px] bg-tile object-cover" loading={i ? "lazy" : "eager"} />
+              {(title || sub) && (
+                <span className="mt-3 block px-1">
+                  {title && <span className="block text-[1.05rem] font-[650] tracking-[-0.02em]">{title}</span>}
+                  {sub && <span className="mt-0.5 block text-[0.9rem] text-ink-soft">{sub}</span>}
+                </span>
+              )}
+            </>
+          );
+          const cls = `block shrink-0 snap-start ${one ? "w-full" : "w-[86%] md:w-auto"}`;
+          if (b.link.startsWith("/")) return <Link key={i} href={href(b.link)} className={cls}>{body}</Link>;
+          if (/^https?:\/\//.test(b.link)) return <a key={i} href={b.link} target="_blank" rel="noopener" className={cls}>{body}</a>;
+          return <div key={i} className={cls}>{body}</div>;
+        })}
+      </div>
+    </section>
+  );
+}
+
+/* ---------- featured categories: picture tiles the owner chose ---------- */
+
+function FeaturedCategories() {
+  const { store, lang, href, categories } = useSite();
+  const all = useMemo(() => {
+    const out: typeof categories = [];
+    const walk = (cs: typeof categories) => cs.forEach((c) => (out.push(c), walk(c.children)));
+    walk(categories);
+    return out;
+  }, [categories]);
+  const picked = store.featuredCategoryIds.map((id) => all.find((c) => c.dbId === id)).filter((c): c is (typeof all)[number] => !!c);
+  if (!picked.length) return null;
+  return (
+    <section aria-label="Categories" className="wrap mb-12 md:mb-16">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {picked.map((c) => (
+          <Link key={c.id} href={href(`/catalog/?c=${c.id}`)} className="group block">
+            <span className="block aspect-[4/3] overflow-hidden rounded-[18px] bg-tile">
+              {c.image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={c.image} alt="" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />
+              )}
+            </span>
+            <span className="mt-2 block px-1 text-[0.95rem] font-[600]">{tr(c.name, lang)}</span>
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }

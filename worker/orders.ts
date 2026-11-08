@@ -2,7 +2,7 @@ import type { OrderError, OrderRequest, OrderResponse } from "../src/shared/api-
 import { parseValue, publicStore } from "../src/shared/settings";
 import { json, readJson } from "./http";
 import { allow, ipKey } from "./ratelimit";
-import { escHtml, sendTelegram } from "./telegram";
+import { orderMessage, sendTelegram } from "./telegram";
 import type { Ctx } from "./router";
 
 const fail = (status: number, code: OrderError, extra: Record<string, unknown> = {}) => json({ error: code, ...extra }, { status });
@@ -91,6 +91,11 @@ export async function createOrder({ req, env, exec, url }: Ctx): Promise<Respons
   const total = lines.reduce((s, l) => s + l.price * l.quantity, 0);
   if (store.orders.min_amount > 0 && total < store.orders.min_amount) return fail(400, "min", { min_amount: store.orders.min_amount });
 
+  const token = String(parseValue(raw["notify.telegram_token"] ?? "") ?? "");
+  const chat = String(parseValue(raw["notify.telegram_chat_id"] ?? "") ?? "");
+  const on = raw["notify.telegram_enabled"] === undefined ? !!(token && chat) : parseValue(raw["notify.telegram_enabled"]) === true;
+  const notifyOn = on && !!token && !!chat;
+
   // one transaction: stock guards first (a failing guard aborts everything),
   // then the order, its lines, the stock and the popularity counters
   const now = new Date().toISOString();
@@ -104,10 +109,10 @@ export async function createOrder({ req, env, exec, url }: Ctx): Promise<Respons
   stmts.push(
     db
       .prepare(
-        `INSERT INTO orders (order_number, customer_name, customer_phone, customer_data, total, status, created_at, updated_at, lang)
-         VALUES ('S-' || (1001 + COALESCE((SELECT MAX(id) FROM orders), 0)), ?, ?, ?, ?, 'new', ?, ?, ?)`,
+        `INSERT INTO orders (order_number, customer_name, customer_phone, customer_data, total, status, notified, created_at, updated_at, lang)
+         VALUES ('S-' || (1001 + COALESCE((SELECT MAX(id) FROM orders), 0)), ?, ?, ?, ?, 'new', ?, ?, ?, ?)`,
       )
-      .bind(name, phone, JSON.stringify(fields), total, now, now, body.lang ?? store.language),
+      .bind(name, phone, JSON.stringify(fields), total, notifyOn ? 0 : 2, now, now, body.lang ?? store.language),
   );
   for (const l of lines) {
     stmts.push(
@@ -134,27 +139,13 @@ export async function createOrder({ req, env, exec, url }: Ctx): Promise<Respons
   }
 
   // notify after the order is safe; the customer does not wait for Telegram
-  const token = String(parseValue(raw["notify.telegram_token"] ?? "") ?? "");
-  const chat = String(parseValue(raw["notify.telegram_chat_id"] ?? "") ?? "");
-  const on = raw["notify.telegram_enabled"] === undefined ? !!(token && chat) : parseValue(raw["notify.telegram_enabled"]) === true;
-  if (on && token && chat) {
-    const money = (q: number) => `${(q / 100).toFixed(2)} ${store.currency.symbol}`;
-    const text = [
-      `🛒 <b>Yeni sifariş #${saved.order_number}</b>`,
-      "",
-      `👤 ${escHtml(name)}`,
-      `📞 ${phone}`,
-      fields.address ? `📍 ${escHtml(fields.address)}` : "",
-      "",
-      ...lines.map((l) => `• ${escHtml(l.name)}${l.variant_text ? ` (${escHtml(l.variant_text)})` : ""} × ${l.quantity} — ${money(l.price * l.quantity)}`),
-      "",
-      `💰 Cəmi: <b>${money(total)}</b>`,
-      fields.note ? `📝 Qeyd: ${escHtml(fields.note)}` : "",
-      "",
-      `Admin paneldə bax: ${url.origin}/admin/orders/?id=${saved.id}`,
-    ]
-      .filter((x, i, a) => x !== "" || a[i - 1] !== "")
-      .join("\n");
+  if (notifyOn) {
+    const text = orderMessage(
+      { id: saved.id, order_number: saved.order_number, name, phone, address: fields.address, note: fields.note, total },
+      lines,
+      store.currency.symbol,
+      url.origin,
+    );
     exec.waitUntil(
       sendTelegram(token, chat, text).then((ok) =>
         ok ? env.DB.prepare("UPDATE orders SET notified = 1 WHERE id = ?").bind(saved.id).run().then(() => undefined) : undefined,

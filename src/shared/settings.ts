@@ -7,7 +7,17 @@ import type { ApiStore, FormField, Lang, Text } from "./api-types";
  * Nothing here is shop-specific.
  */
 /** Code version, shown in the admin panel; bump it with CHANGELOG.md. */
-export const APP_VERSION = "0.6.0";
+export const APP_VERSION = "0.7.0";
+
+/** Fonts bundled into the build (CSS family names). Only these reach the page's CSS. */
+export const FONTS: Record<string, string> = {
+  "Inter Tight": '"Inter Tight Variable"',
+  Manrope: '"Manrope Variable"',
+  Montserrat: '"Montserrat Variable"',
+  Onest: '"Onest Variable"',
+  "Playfair Display": '"Playfair Display Variable"',
+  System: "system-ui",
+};
 
 export const DEFAULT_FORM_FIELDS: FormField[] = [
   { key: "name", visible: true, required: true },
@@ -91,7 +101,7 @@ export function publicStore(rows: Record<string, string>): ApiStore {
       primary: color(get("theme.primary_color"), "#0a0a0a"),
       secondary: color(get("theme.secondary_color"), "#ff6f5e"),
       paper: color(get("theme.paper_color"), "#ffffff"),
-      font: str(get("theme.font")) || "Inter Tight",
+      font: str(get("theme.font")) in FONTS ? str(get("theme.font")) : "Inter Tight",
       layout: get("theme.layout") === "list" ? "list" : "grid",
     },
     contact: {

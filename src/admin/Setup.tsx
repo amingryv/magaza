@@ -176,7 +176,7 @@ function PasswordStep({ onNext }: { onNext: () => void }) {
 
 /* ---------- 2. shop ---------- */
 
-const LANGS = [
+export const LANGS = [
   { v: "az", l: "Azərbaycan" },
   { v: "ru", l: "Русский" },
   { v: "en", l: "English" },
@@ -255,7 +255,7 @@ function StoreStep({ s, lang, save, onNext }: { s: S; lang: string; save: (p: S)
 
 /* ---------- 3. colours ---------- */
 
-const PALETTES = [
+export const PALETTES = [
   { n: "Qara", ink: "#0a0a0a", accent: "#ff6f5e" },
   { n: "Gecə", ink: "#13294b", accent: "#e0a526" },
   { n: "Meşə", ink: "#1f3d2b", accent: "#c8743a" },
@@ -315,7 +315,7 @@ function ColorStep({ s, save, onBack, onNext }: { s: S; save: (p: S) => Promise<
   );
 }
 
-function ColorInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+export function ColorInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <label className="flex items-center gap-3 rounded-[14px] px-3 py-2.5 outline outline-1 -outline-offset-1 outline-ink-line-2">
       <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="size-9 shrink-0 cursor-pointer rounded-full" />
@@ -386,13 +386,7 @@ function ContactStep({
 /* ---------- 5. Telegram ---------- */
 
 function TelegramStep({ tg, onBack, onNext }: { tg: Telegram; onBack: () => void; onNext: () => void }) {
-  const [bot, setBot] = useState(tg.bot);
   const [connected, setConnected] = useState(tg.connected);
-  const [token, setToken] = useState("");
-  const [msg, setMsg] = useState("");
-  const check = useAction();
-  const conn = useAction();
-
   return (
     <form
       className="flex flex-1 flex-col"
@@ -402,7 +396,24 @@ function TelegramStep({ tg, onBack, onNext }: { tg: Telegram; onBack: () => void
       }}
     >
       <Head title="Telegram bildirişi" lead="Hər yeni sifariş Telegram-a mesaj kimi gələcək. Bu addımı keçib sonra da qura bilərsiniz." />
+      <TelegramConnect tg={tg} onChange={setConnected} />
+      <Nav onBack={onBack} next={connected ? "İrəli" : "Sonra quraram"} />
+    </form>
+  );
+}
 
+/** BotFather token → /start → connect. Shared by the wizard and the settings page. */
+export function TelegramConnect({ tg, onChange }: { tg: Telegram; onChange?: (connected: boolean) => void }) {
+  const [bot, setBot] = useState(tg.bot);
+  const [connected, setC] = useState(tg.connected);
+  const setConnected = (v: boolean) => (setC(v), onChange?.(v));
+  const [token, setToken] = useState("");
+  const [msg, setMsg] = useState("");
+  const check = useAction();
+  const conn = useAction();
+
+  return (
+    <>
       <ol className="grid gap-3 text-[0.95rem]">
         <li className="rounded-[16px] bg-paper-2 p-4">
           <b>1.</b> Telegram-da{" "}
@@ -471,9 +482,7 @@ function TelegramStep({ tg, onBack, onNext }: { tg: Telegram; onBack: () => void
           {connected && !msg && <Notice tone="ok">Telegram artıq qoşulub.</Notice>}
         </li>
       </ol>
-
-      <Nav onBack={onBack} next={connected ? "İrəli" : "Sonra quraram"} />
-    </form>
+    </>
   );
 }
 

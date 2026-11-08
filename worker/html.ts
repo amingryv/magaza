@@ -1,5 +1,5 @@
 import type { Bootstrap, Lang, Translations } from "../src/shared/api-types";
-import { pickText, publicStore } from "../src/shared/settings";
+import { FONTS, pickText, publicStore } from "../src/shared/settings";
 import { loadBootstrap } from "./catalog";
 
 /**
@@ -89,7 +89,9 @@ export async function injectShop(env: Env, req: Request, res: Response): Promise
   const t = boot.store.theme;
 
   const head = [
-    `<style id="brand">:root{--brand-paper:${t.paper};--brand-ink:${t.primary};--brand-accent:${t.secondary}}</style>`,
+    `<style id="brand">:root{--brand-paper:${t.paper};--brand-ink:${t.primary};--brand-accent:${t.secondary}${
+      t.font !== "Inter Tight" ? `;--font-sans:${FONTS[t.font]},system-ui,-apple-system,"Segoe UI",sans-serif` : ""
+    }}</style>`,
     `<meta property="og:type" content="website">`,
     `<meta property="og:site_name" content="${esc(boot.store.name)}">`,
     `<meta property="og:title" content="${esc(meta.title)}">`,
@@ -105,6 +107,7 @@ export async function injectShop(env: Env, req: Request, res: Response): Promise
     .on("html", {
       element(el) {
         el.setAttribute("lang", lang);
+        if (t.layout === "list") el.setAttribute("data-layout", "list");
       },
     })
     .on("title", {

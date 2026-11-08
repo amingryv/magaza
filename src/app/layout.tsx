@@ -1,5 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/inter-tight";
+// the owner's other font choices (theme.font); a face downloads only when used
+import "@fontsource-variable/manrope";
+import "@fontsource-variable/montserrat";
+import "@fontsource-variable/onest";
+import "@fontsource-variable/playfair-display";
 import "./globals.css";
 import { springCurve } from "@/lib/spring-curve";
 

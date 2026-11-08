@@ -6,6 +6,7 @@ import { injectShop, rootRedirect } from "./html";
 import { createOrder } from "./orders";
 import * as A from "./admin";
 import * as C from "./admin-catalog";
+import * as O from "./admin-orders";
 
 const router = new Router()
   // Health check: confirms the Worker runs and the migrations reached D1.
@@ -52,7 +53,12 @@ const router = new Router()
   .get("/api/admin/products/:id", C.getAdminProduct)
   .put("/api/admin/products/:id", C.updateProduct)
   .delete("/api/admin/products/:id", C.deleteProduct)
-  .post("/api/admin/products/:id/copy", C.copyProduct);
+  .post("/api/admin/products/:id/copy", C.copyProduct)
+  .get("/api/admin/stats", O.stats)
+  .get("/api/admin/orders", O.listOrders)
+  .get("/api/admin/orders/:id", O.getOrder)
+  .patch("/api/admin/orders/:id", O.patchOrder)
+  .post("/api/admin/orders/:id/notify", O.notifyOrder);
 
 export default {
   async fetch(req, env, exec): Promise<Response> {
