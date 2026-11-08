@@ -14,7 +14,7 @@ npm run db:seed:local     # demo mağaza "İlmə": seed/demo.sql → lokal D1, s
 npm run typecheck         # tsc front + tsc -p worker
 npm run lint
 npm run cf-typegen        # wrangler.jsonc dəyişəndən sonra → worker-configuration.d.ts (Env)
-npm run deploy            # wrangler d1 migrations apply DB --remote && wrangler deploy
+npm run deploy            # scripts/deploy.mjs: D1 migration → wrangler deploy (baza hələ yoxdursa: deploy → migration)
 ```
 
 Test sistemi yoxdur. `npx wrangler deploy --dry-run` konfiqurasiyanı deploy etmədən yoxlayır. Windows-da `wrangler dev` dayandırılanda workerd prosesləri qala bilər və yeni server cavab vermir — belə olanda bütün `workerd` proseslərini öldür.

@@ -12,7 +12,7 @@
     "cf-typegen": "wrangler types",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:migrations:apply": "wrangler d1 migrations apply DB --remote",
-    "deploy": "npm run db:migrations:apply && wrangler deploy",
+    "deploy": "node scripts/deploy.mjs",
     "db:seed:local": "node scripts/seed-demo.mts"
   },
   "dependencies": {
@@ -51,5 +51,8 @@
         "description": "Məhsul şəkilləri, logo və bannerlər üçün yaddaş. Adı istəyə görə dəyişmək olar."
       }
     }
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
