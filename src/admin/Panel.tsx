@@ -111,7 +111,7 @@ export function Panel({ version, onLogout }: { version: string; onLogout: () => 
                 Mağazaya bax
               </a>
             </div>
-            <nav className="no-scrollbar -mx-4 mt-5 flex gap-1.5 overflow-x-auto px-4" aria-label="Bölmələr">
+            <nav className="no-scrollbar -mx-4 mt-5 flex gap-1.5 overflow-x-auto px-4 md:mx-0 md:flex-wrap md:overflow-visible md:px-0" aria-label="Bölmələr">
               {TABS.map(([id, label]) => (
                 <a
                   key={id}

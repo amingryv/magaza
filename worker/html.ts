@@ -103,6 +103,7 @@ export async function injectShop(env: Env, req: Request, res: Response): Promise
     `<script id="__boot" type="application/json">${scriptJson(boot)}</script>`,
   ].join("");
 
+  let hasTitle = false;
   const rewritten = new HTMLRewriter()
     .on("html", {
       element(el) {
@@ -112,6 +113,7 @@ export async function injectShop(env: Env, req: Request, res: Response): Promise
     })
     .on("title", {
       element(el) {
+        hasTitle = true;
         el.setInnerContent(meta.title);
       },
     })
@@ -128,6 +130,11 @@ export async function injectShop(env: Env, req: Request, res: Response): Promise
     .on("head", {
       element(el) {
         el.append(head, { html: true });
+        // the store pages have no <title> in the build (React would put a
+        // generic one back after loading), so it is written here
+        el.onEndTag((end) => {
+          if (!hasTitle) end.before(`<title>${esc(meta.title)}</title>`, { html: true });
+        });
       },
     })
     // the shop's name wherever the build left a placeholder for it

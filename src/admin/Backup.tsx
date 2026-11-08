@@ -183,7 +183,7 @@ function Sheet() {
       </div>
 
       <ul className="mt-4 grid gap-1 text-[0.8rem] text-ink-soft">
-        <li>• Kodu (SKU) mağazada olan məhsul yenilənir, qalanları yeni məhsul kimi əlavə olunur.</li>
+        <li>• «Link» və ya «Kod» sütunu mağazadakı məhsulla eyni olan sətir o məhsulu yeniləyir, qalanları yeni məhsul kimi əlavə olunur. Ən rahatı: «Bütün məhsulları yüklə», Excel-də dəyiş, geri yüklə.</li>
         <li>• Faylda olmayan sütuna toxunulmur. Xananı boşaltsanız, o məlumat silinir (məs. köhnə qiymət).</li>
         <li>• Qiymət manatla: 12.50 və ya 12,50. Bir neçə seçim: Qırmızı | Mavi. Bəli/xeyr sütunları: bəli və ya xeyr.</li>
         <li>• Olmayan kateqoriya avtomatik yaradılır. Şəkil və variantları məhsulun öz səhifəsində əlavə edin.</li>

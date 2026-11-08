@@ -17,6 +17,7 @@ const FIELDS = [
   ["description", "Təsvir"],
   ["is_active", "Aktiv"],
   ["is_featured", "Seçilmiş"],
+  ["slug", "Link"],
 ] as const;
 type Field = (typeof FIELDS)[number][0];
 
@@ -60,7 +61,7 @@ function attrCell(a: AdminAttribute, v: unknown): string {
 }
 
 export type ExportRow = {
-  name: string; sku: string | null; price: number; old_price: number | null; stock: number | null; description: string | null;
+  name: string; slug: string; sku: string | null; price: number; old_price: number | null; stock: number | null; description: string | null;
   category: string | null; is_active: boolean; is_featured: boolean; variants: number; attributes: Record<string, unknown>;
 };
 
@@ -70,7 +71,7 @@ export function productsCsv(items: ExportRow[], attrs: AdminAttribute[]): string
     headers(attrs),
     ...items.map((p) => [
       p.name, p.sku ?? "", manat(p.price), manat(p.old_price), p.variants ? "" : (p.stock ?? ""), p.category ?? "", p.description ?? "",
-      yesNo(p.is_active), yesNo(p.is_featured), ...list.map((a) => attrCell(a, p.attributes[a.key])),
+      yesNo(p.is_active), yesNo(p.is_featured), p.slug, ...list.map((a) => attrCell(a, p.attributes[a.key])),
     ]),
   ]);
 }
@@ -79,8 +80,8 @@ export function templateCsv(attrs: AdminAttribute[]): string {
   const list = sheetAttrs(attrs);
   return toCsv([
     headers(attrs),
-    ["Pambıq köynək", "KY-001", "25.00", "30.00", "10", "Geyim", "Yumşaq pambıq parça", "bəli", "xeyr", ...list.map(() => "")],
-    ["Dəri kəmər", "KM-002", "15.50", "", "", "Aksesuar", "", "bəli", "xeyr", ...list.map(() => "")],
+    ["Pambıq köynək", "KY-001", "25.00", "30.00", "10", "Geyim", "Yumşaq pambıq parça", "bəli", "xeyr", "", ...list.map(() => "")],
+    ["Dəri kəmər", "KM-002", "15.50", "", "", "Aksesuar", "", "bəli", "xeyr", "", ...list.map(() => "")],
   ]);
 }
 

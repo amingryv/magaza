@@ -8,10 +8,10 @@ import "@fontsource-variable/playfair-display";
 import "./globals.css";
 import { springCurve } from "@/lib/spring-curve";
 
-// The build holds no shop data: the Worker replaces the title, description,
-// theme colour and Open Graph tags on every response (worker/html.ts).
+// The build holds no shop data: the Worker writes the title and replaces the
+// description, theme colour and Open Graph tags on every response
+// (worker/html.ts). No title here: React would put it back after loading.
 export const metadata: Metadata = {
-  title: "Mağaza",
   description: "",
 };
 

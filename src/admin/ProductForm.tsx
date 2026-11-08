@@ -21,7 +21,7 @@ import {
   type ImageRef,
   type Translations,
 } from "./catalog";
-import { BackIcon, CameraIcon, Card, Chip, ConfirmButton, DragIcon, IconBtn, PlusIcon, Select, Toggle, XIcon } from "./controls";
+import { BackIcon, CameraIcon, CHEVRON, Card, Chip, ConfirmButton, DragIcon, IconBtn, PlusIcon, Select, Toggle, XIcon } from "./controls";
 import { Field, Notice, Spinner, TextArea, useAction } from "./ui";
 import { go, useShop } from "./Panel";
 import { useCategories } from "./Categories";
@@ -629,7 +629,7 @@ function Variants({
                   <MiniField label="Kod" placeholder="—" value={v.sku} onChange={(x) => patch(i, { sku: x })} />
                   <label className="block">
                     <span className="mb-1 block text-[0.76rem] font-medium text-ink-soft">Şəkil</span>
-                    <select className="field !h-11 !rounded-[12px] !px-3 text-[0.9rem]" value={v.image ?? ""} onChange={(e) => patch(i, { image: e.target.value || null })}>
+                    <select className="field !h-11 cursor-pointer appearance-none !rounded-[12px] bg-[length:10px] bg-[right_0.7rem_center] bg-no-repeat !pl-3 !pr-7 text-[0.9rem]" style={{ backgroundImage: CHEVRON }} value={v.image ?? ""} onChange={(e) => patch(i, { image: e.target.value || null })}>
                       <option value="">Əsas şəkil</option>
                       {images.map((img, n) => (
                         <option key={img.key} value={img.key}>

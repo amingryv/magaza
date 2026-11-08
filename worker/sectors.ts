@@ -70,7 +70,8 @@ export function sectorStatements(env: Env, sector: string): D1PreparedStatement[
   return (SECTORS[sector] ?? []).map((a, i) =>
     env.DB.prepare(
       `INSERT OR IGNORE INTO attributes (name, key, type, options, unit, filterable, is_variant, category_ids, sort_order, translations)
-       VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`,
+       SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, NULL, ?8, ?9
+       WHERE NOT EXISTS (SELECT 1 FROM attributes WHERE lower(name) = lower(?1))`, // a same-named one (e.g. from a template or earlier sector) is kept as it is
     ).bind(
       a.name,
       a.key,

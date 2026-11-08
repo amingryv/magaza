@@ -286,7 +286,7 @@ export function OrderView({ id, onChange }: { id: number; onChange: () => void }
       <section className="mt-5 rounded-[20px] bg-paper-2 p-4 sm:p-5">
         <p className="text-[1.15rem] font-semibold">{o.customer_name}</p>
         <a href={`tel:${o.customer_phone}`} className="num mt-0.5 block text-ink-soft">
-          {o.customer_phone}
+          {prettyPhone(o.customer_phone)}
         </a>
         <div className="mt-4 grid grid-cols-2 gap-2">
           <a href={`tel:${o.customer_phone}`} className="pill pill-ink h-11 text-[0.92rem]">
@@ -406,4 +406,10 @@ export function OrderView({ id, onChange }: { id: number; onChange: () => void }
       </section>
     </div>
   );
+}
+
+/** "+994501234567" → "+994 50 123 45 67"; other numbers stay as typed. */
+function prettyPhone(p: string): string {
+  const m = p.replace(/\s/g, "").match(/^\+994(\d{2})(\d{3})(\d{2})(\d{2})$/);
+  return m ? `+994 ${m[1]} ${m[2]} ${m[3]} ${m[4]}` : p;
 }

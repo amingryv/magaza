@@ -7,6 +7,8 @@ import { UNLIMITED, type Category, type Product, type ProductOption, type Spec, 
 export type StoreSettings = {
   name: string;
   tagline: LocalText;
+  /** owner's SEO title for the home page ("" = name — tagline) */
+  seoTitle: string;
   logo: string | null;
   /** digits only, for wa.me links */
   whatsapp: string;
@@ -50,6 +52,7 @@ export function adaptStore(s: ApiStore): StoreSettings {
   return {
     name: s.name,
     tagline: localText(s.description, m),
+    seoTitle: s.seo.title,
     logo: s.logo,
     whatsapp: s.contact.whatsapp,
     phoneDisplay: s.contact.phone,

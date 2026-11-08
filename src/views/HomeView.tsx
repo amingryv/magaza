@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { useSite } from "@/lib/site";
 import { tr } from "@/lib/i18n";
@@ -29,9 +29,14 @@ export function HomeView() {
 /* ---------- hero: the shop's name, and a way in ---------- */
 
 function Hero() {
-  const { t, store, ready } = useSite();
+  const { t, store, ready, lang } = useSite();
+  // the build's <title> is generic; React puts it back on load, so set the Worker's home title again
+  useEffect(() => {
+    if (!ready) return;
+    const tag = tr(store.tagline, lang);
+    document.title = store.seoTitle || (tag ? `${store.name} — ${tag}` : store.name);
+  }, [ready, store, lang]);
   const search = useSearch();
-  const letters = Array.from(store.name);
 
   return (
     <section className="wrap pb-10 pt-12 text-center md:pb-16 md:pt-24">
@@ -39,11 +44,22 @@ function Hero() {
           into the HTML; then it is set again as letters that rise one by one. */}
       <h1 className="hero-name" aria-label={store.name} data-store={ready ? undefined : "name"} suppressHydrationWarning>
         {ready
-          ? letters.map((ch, i) => (
-              <span key={i} className="hero-letter" aria-hidden style={{ animationDelay: `${0.04 + i * 0.05}s` }}>
-                {ch}
-              </span>
-            ))
+          ? // words stay whole (a long name wraps between words) and keep their spaces
+            store.name.split(" ").map((word, w, all) => {
+              const start = all.slice(0, w).reduce((n, x) => n + Array.from(x).length + 1, 0);
+              return (
+                <Fragment key={w}>
+                  {w > 0 && " "}
+                  <span className="inline-block whitespace-nowrap" aria-hidden>
+                    {Array.from(word).map((ch, i) => (
+                      <span key={i} className="hero-letter" style={{ animationDelay: `${0.04 + (start + i) * 0.05}s` }}>
+                        {ch}
+                      </span>
+                    ))}
+                  </span>
+                </Fragment>
+              );
+            })
           : store.name}
       </h1>
       <button type="button" onClick={search.open} className="hero-search" aria-haspopup="dialog">

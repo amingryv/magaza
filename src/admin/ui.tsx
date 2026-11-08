@@ -53,7 +53,7 @@ export function PasswordField({ label, ...input }: { label: string } & React.Inp
 }
 
 export function Notice({ tone = "error", children }: { tone?: "error" | "ok" | "info"; children: React.ReactNode }) {
-  const c = tone === "error" ? "text-danger bg-danger/8" : tone === "ok" ? "text-ok bg-ok/8" : "text-ink bg-paper-2";
+  const c = tone === "error" ? "text-danger bg-danger/8" : tone === "ok" ? "text-ok bg-ok/8" : "text-ink bg-paper";
   return (
     <p role={tone === "error" ? "alert" : "status"} className={`rounded-[14px] px-4 py-3 text-[0.9rem] font-medium ${c}`}>
       {children}

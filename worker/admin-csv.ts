@@ -7,7 +7,8 @@ import type { AttributeType } from "../src/shared/api-types";
 /*
  * Products to and from a spreadsheet. The panel parses the CSV and sends rows
  * of up to 100; a row with a code (SKU) that already exists updates that
- * product, any other row creates one. A field that is absent from the row is
+ * product (a row with a link — the product's slug — updates that one first),
+ * any other row creates one. A field that is absent from the row is
  * left alone; a field sent as null is cleared. Pictures, variants and
  * translations are not part of the sheet and are never touched.
  */
@@ -16,14 +17,14 @@ type B = Record<string, unknown>;
 type Attr = { id: number; key: string; type: AttributeType; options: string | null; is_variant: number };
 type Cat = { id: number; name: string; slug: string };
 type Existing = {
-  id: number; sku: string; name: string; description: string | null; price: number; old_price: number | null; stock: number | null;
+  id: number; slug: string; sku: string; name: string; description: string | null; price: number; old_price: number | null; stock: number | null;
   category_id: number | null; attributes: string | null; translations: string | null; is_active: number; is_featured: number; variants: string | null;
 };
 
 /** Every product as a flat row (the panel turns it into CSV). */
 export const exportProducts = admin(async ({ env }) => {
   const { results } = await env.DB.prepare(
-    `SELECT p.name, p.sku, p.price, p.old_price, p.stock, p.description, p.is_active, p.is_featured, p.attributes, c.name AS category,
+    `SELECT p.name, p.slug, p.sku, p.price, p.old_price, p.stock, p.description, p.is_active, p.is_featured, p.attributes, c.name AS category,
        (SELECT COUNT(*) FROM product_variants v WHERE v.product_id = p.id) AS variants
      FROM products p LEFT JOIN categories c ON c.id = p.category_id ORDER BY p.created_at DESC, p.id DESC`,
   ).all<B & { attributes: string | null; is_active: number; is_featured: number }>();
@@ -37,21 +38,26 @@ export const importProducts = admin(async ({ env, req }) => {
   if (!Array.isArray(body.rows) || !body.rows.length || body.rows.length > 100) throw new HttpError(400, "Sətirlər yanlışdır");
   const rows = (body.rows as unknown[]).map((r) => (r && typeof r === "object" && !Array.isArray(r) ? (r as B) : {}));
   const skus = [...new Set(rows.map((r) => (typeof r.sku === "string" ? r.sku.trim() : "")).filter(Boolean))];
+  const links = [...new Set(rows.map((r) => (typeof r.slug === "string" ? slugify(r.slug) : "")).filter(Boolean))];
 
   const [catsR, attrsR, oldR, slugsR] = await env.DB.batch([
     env.DB.prepare("SELECT id, name, slug FROM categories"),
     env.DB.prepare("SELECT id, key, type, options, is_variant FROM attributes"),
     env.DB.prepare(
-      `SELECT p.id, p.sku, p.name, p.description, p.price, p.old_price, p.stock, p.category_id, p.attributes, p.translations, p.is_active, p.is_featured,
+      `SELECT p.id, p.slug, p.sku, p.name, p.description, p.price, p.old_price, p.stock, p.category_id, p.attributes, p.translations, p.is_active, p.is_featured,
          (SELECT json_group_array(json_object('o', json(v.options), 's', v.sku)) FROM product_variants v WHERE v.product_id = p.id) AS variants
-       FROM products p WHERE p.sku IN (SELECT value FROM json_each(?)) ORDER BY p.id`,
-    ).bind(JSON.stringify(skus)),
+       FROM products p WHERE p.sku IN (SELECT value FROM json_each(?1)) OR p.slug IN (SELECT value FROM json_each(?2)) ORDER BY p.id`,
+    ).bind(JSON.stringify(skus), JSON.stringify(links)),
     env.DB.prepare("SELECT slug FROM products"),
   ]);
   const cats = catsR.results as Cat[];
   const attrs = new Map((attrsR.results as Attr[]).filter((a) => !a.is_variant).map((a) => [a.key, a]));
   const bySku = new Map<string, Existing>();
-  for (const p of oldR.results as Existing[]) if (!bySku.has(p.sku)) bySku.set(p.sku, p);
+  const bySlug = new Map<string, Existing>();
+  for (const p of oldR.results as Existing[]) {
+    bySlug.set(p.slug, p);
+    if (p.sku && !bySku.has(p.sku)) bySku.set(p.sku, p);
+  }
   const slugs = new Set((slugsR.results as { slug: string }[]).map((r) => r.slug));
 
   // categories by name or link; missing ones are created first
@@ -104,9 +110,12 @@ export const importProducts = admin(async ({ env, req }) => {
   rows.forEach((r, i) => {
     const line = int(r.line, "line", 1, 10_000_000) ?? i + 1;
     try {
-      const sku = typeof r.sku === "string" && r.sku.trim() ? text(r.sku, "Kod", 60) : null;
-      const old = sku ? bySku.get(sku) : undefined;
+      const link = typeof r.slug === "string" ? slugify(r.slug) : "";
+      const skuIn = typeof r.sku === "string" && r.sku.trim() ? text(r.sku, "Kod", 60) : null;
+      // the link names one product exactly; the code is the fallback
+      const old = (link && bySlug.get(link)) || (skuIn ? bySku.get(skuIn) : undefined);
       const pick = <T>(k: string, read: () => T, fallback: T): T => (present(r, k) ? read() : fallback);
+      const sku = pick("sku", () => skuIn, old?.sku ?? null);
 
       const name = pick("name", () => text(r.name, "Ad", 200, true), old?.name ?? "");
       if (!name) throw new HttpError(400, "Ad boş ola bilməz");
@@ -141,17 +150,21 @@ export const importProducts = admin(async ({ env, req }) => {
       if (old) {
         writes.push(
           env.DB.prepare(
-            `UPDATE products SET name = ?, price = ?, old_price = ?, stock = ?, description = ?, category_id = ?, is_active = ?, is_featured = ?,
+            `UPDATE products SET name = ?, sku = ?, price = ?, old_price = ?, stock = ?, description = ?, category_id = ?, is_active = ?, is_featured = ?,
                attributes = ?, search_text = ?, updated_at = ?
-             WHERE id = COALESCE(NULLIF(?, -1), (SELECT MAX(id) FROM products WHERE sku = ?))`,
-          ).bind(name, price, oldPrice, stock, description, category, active, featured, JSON.stringify(at), search, now, old.id, sku),
+             WHERE id = COALESCE(NULLIF(?, -1), (SELECT id FROM products WHERE slug = ?))`,
+          ).bind(name, sku, price, oldPrice, stock, description, category, active, featured, JSON.stringify(at), search, now, old.id, old.slug),
         );
         updated++;
       } else {
-        const base = slugify(name) || "mehsul";
+        const base = link || slugify(name) || "mehsul";
         let slug = base;
         for (let n = 2; slugs.has(slug); n++) slug = `${base}-${n}`;
         slugs.add(slug);
+        // a later row with the same link or code updates the one just made (id -1 = found by its slug)
+        const made: Existing = { id: -1, slug, sku: sku ?? "", name, description, price, old_price: oldPrice, stock, category_id: category, attributes: JSON.stringify(at), translations: null, is_active: active, is_featured: featured, variants: "[]" };
+        bySlug.set(slug, made);
+        if (sku) bySku.set(sku, made);
         writes.push(
           env.DB.prepare(
             `INSERT INTO products (category_id, name, slug, description, price, old_price, stock, sku, images, attributes, is_active, is_featured, sort_order, created_at, updated_at, search_text)
@@ -159,8 +172,6 @@ export const importProducts = admin(async ({ env, req }) => {
           ).bind(category, name, slug, description, price, oldPrice, stock, sku, JSON.stringify(at), active, featured, now, now, search),
         );
         created++;
-        // a later row with the same code updates the one just made (id -1 = the newest with this code)
-        if (sku) bySku.set(sku, { id: -1, sku, name, description, price, old_price: oldPrice, stock, category_id: category, attributes: JSON.stringify(at), translations: null, is_active: active, is_featured: featured, variants: "[]" });
       }
     } catch (e) {
       errors.push({ line, error: e instanceof HttpError ? e.message : "Yanlış sətir" });

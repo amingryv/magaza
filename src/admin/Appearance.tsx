@@ -6,6 +6,7 @@ import { Chip, ConfirmButton, DownIcon, IconBtn, ImageIcon, UpIcon, XIcon } from
 import { Field, Notice, Spinner, useAction } from "./ui";
 import { ColorInput, PALETTES } from "./Setup";
 import { useCategories } from "./Categories";
+import { useShop } from "./Panel";
 import { flatTree } from "./catalog";
 import { LocalField, fromLocal, str, toLocal, useDraft, useSettings, type LocalValue, type S } from "./settings-ui";
 import { FONTS } from "@/shared/settings";
@@ -374,6 +375,7 @@ function FeaturedCard({ featured, onChange }: { featured: number[]; onChange: (i
 /* ---------- live preview ---------- */
 
 function Preview({ v, main }: { v: V; main: string }) {
+  const name = useShop().name || "Mağaza";
   const b = v.banners[0];
   const title = b ? (b.title[main] ?? "") : "";
   return (
@@ -382,7 +384,7 @@ function Preview({ v, main }: { v: V; main: string }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {v.logo && <img src={v.logo} alt="" className="size-7 rounded-[8px] object-contain" />}
         <span className="text-[0.95rem] font-[650]" style={{ color: v.ink }}>
-          Mağaza
+          {name}
         </span>
         <span className="ml-auto text-[0.75rem] font-semibold" style={{ color: v.accent }}>
           Yeni
@@ -397,7 +399,7 @@ function Preview({ v, main }: { v: V; main: string }) {
           </>
         ) : (
           <p className="py-4 text-center text-[1.6rem] font-[650] tracking-[-0.03em]" style={{ color: v.ink }}>
-            Mağaza
+            {name}
           </p>
         )}
       </div>
