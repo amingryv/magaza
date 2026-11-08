@@ -118,10 +118,9 @@ export const getOrder = admin(async ({ env, params }) => {
 });
 
 /**
- * PATCH { status?, admin_note? }. Cancelling puts the pieces back in stock;
- * taking a cancelled order back takes them out again. Stock changes are
- * conditioned on the old status inside the same transaction, so two
- * devices pressing at once cannot return the stock twice.
+ * PATCH { status?, admin_note? }. Stock is never changed by orders: the
+ * owner sets it on the product. Only the hidden popularity counter follows
+ * cancelling (conditioned on the old status, so it moves once).
  */
 export const patchOrder = admin(async ({ env, req, params }) => {
   const id = orderId(params.id);
@@ -147,11 +146,6 @@ export const patchOrder = admin(async ({ env, req, params }) => {
       for (const it of items) {
         if (!it.product_id) continue;
         const q = it.quantity * sign;
-        if (it.variant_id)
-          stmts.push(
-            db.prepare(`UPDATE product_variants SET stock = MAX(0, stock + ?) WHERE id = ? AND stock IS NOT NULL AND ${when}`).bind(q, it.variant_id, id, from),
-          );
-        else stmts.push(db.prepare(`UPDATE products SET stock = MAX(0, stock + ?) WHERE id = ? AND stock IS NOT NULL AND ${when}`).bind(q, it.product_id, id, from));
         stmts.push(db.prepare(`UPDATE products SET sold_count = MAX(0, sold_count - ?) WHERE id = ? AND ${when}`).bind(q, it.product_id, id, from));
       }
     }

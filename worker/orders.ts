@@ -96,16 +96,11 @@ export async function createOrder({ req, env, exec, url }: Ctx): Promise<Respons
   const on = raw["notify.telegram_enabled"] === undefined ? !!(token && chat) : parseValue(raw["notify.telegram_enabled"]) === true;
   const notifyOn = on && !!token && !!chat;
 
-  // one transaction: stock guards first (a failing guard aborts everything),
-  // then the order, its lines, the stock and the popularity counters
+  // one transaction: the order, its lines and the popularity counter.
+  // Stock is never touched here: only the owner changes it, in the panel.
   const now = new Date().toISOString();
   const db = env.DB;
-  const guard = (table: "products" | "product_variants", id: number, qty: number) =>
-    db
-      .prepare(`SELECT json(CASE WHEN COALESCE((SELECT stock FROM ${table} WHERE id = ?), 1000000000) >= ? THEN '1' ELSE 'out of stock' END)`)
-      .bind(id, qty);
   const stmts: D1PreparedStatement[] = [];
-  for (const l of lines) stmts.push(l.variant_id ? guard("product_variants", l.variant_id, l.quantity) : guard("products", l.product_id, l.quantity));
   stmts.push(
     db
       .prepare(
@@ -122,21 +117,12 @@ export async function createOrder({ req, env, exec, url }: Ctx): Promise<Respons
         )
         .bind(l.product_id, l.variant_id, l.name, l.variant_text || null, l.price, l.quantity),
     );
-    if (l.variant_id) stmts.push(db.prepare("UPDATE product_variants SET stock = stock - ? WHERE id = ? AND stock IS NOT NULL").bind(l.quantity, l.variant_id));
-    else stmts.push(db.prepare("UPDATE products SET stock = stock - ? WHERE id = ? AND stock IS NOT NULL").bind(l.quantity, l.product_id));
     stmts.push(db.prepare("UPDATE products SET sold_count = sold_count + ? WHERE id = ?").bind(l.quantity, l.product_id));
   }
   stmts.push(db.prepare("SELECT id, order_number FROM orders WHERE id = (SELECT MAX(id) FROM orders)"));
 
-  let saved: { id: number; order_number: string };
-  try {
-    const res = await db.batch(stmts);
-    saved = res[res.length - 1].results[0] as { id: number; order_number: string };
-  } catch (e) {
-    // a stock guard fired: someone bought the last pieces a moment ago
-    if (String(e).includes("JSON")) return fail(409, "stock");
-    throw e;
-  }
+  const res = await db.batch(stmts);
+  const saved = res[res.length - 1].results[0] as { id: number; order_number: string };
 
   // notify after the order is safe; the customer does not wait for Telegram
   if (notifyOn) {

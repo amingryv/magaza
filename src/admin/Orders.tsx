@@ -367,7 +367,7 @@ export function OrderView({ id, onChange }: { id: number; onChange: () => void }
             <Notice>{st.err}</Notice>
           </div>
         )}
-        <p className="mt-3 text-[0.8rem] text-ink-soft">Ləğv edilən sifarişin məhsulları avtomatik stoka qaytarılır.</p>
+        <p className="mt-3 text-[0.8rem] text-ink-soft">Sifarişlər stoka təsir etmir. Stoku məhsulun səhifəsindən özünüz dəyişirsiniz.</p>
       </section>
 
       {/* owner's note */}
