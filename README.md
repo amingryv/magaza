@@ -59,3 +59,9 @@ Gizli açar (secret) yoxdur: Telegram tokeni və digər ayarlar admin paneldən 
 ### Domen
 
 Panel → Workers & Pages → Worker → Settings → Domains & Routes → Custom domain. Domen həmin Cloudflare hesabında olmalıdır.
+
+## Sənədlər
+
+- [`docs/TEHVIL.md`](docs/TEHVIL.md) — yeni mağazanı quran və təhvil verən üçün yoxlama siyahısı
+- [`docs/SAHIBKAR_TELIMATI.md`](docs/SAHIBKAR_TELIMATI.md) — sahibkar üçün sadə təlimat (məhsul, sifariş, Telegram, ehtiyat nüsxə, şifrə sıfırlama, yeniləmə)
+- [`CHANGELOG.md`](CHANGELOG.md) — versiyalar
