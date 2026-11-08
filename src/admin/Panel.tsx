@@ -11,12 +11,14 @@ import { Dashboard, loadStats } from "./Dashboard";
 import { OrderView, Orders } from "./Orders";
 import { Settings } from "./Settings";
 import { Appearance } from "./Appearance";
+import { Pages } from "./Pages";
+import { Backup } from "./Backup";
 
 /*
  * The panel after login. One page (/admin), sections chosen by the hash so
  * the static export needs no extra routes and the back button works:
  *   #/home  #/orders  #/orders/<id>  #/products  #/products/new  #/products/<id>
- *   #/categories  #/attributes  #/appearance  #/settings  #/account
+ *   #/categories  #/attributes  #/appearance  #/pages  #/settings  #/backup  #/account
  */
 
 export type Shop = { name: string; main: string; languages: string[]; symbol: string };
@@ -49,7 +51,9 @@ const TABS = [
   ["categories", "Kateqoriyalar"],
   ["attributes", "Xüsusiyyətlər"],
   ["appearance", "Görünüş"],
+  ["pages", "Səhifələr"],
   ["settings", "Ayarlar"],
+  ["backup", "Ehtiyat nüsxə"],
   ["account", "Hesab"],
 ] as const;
 
@@ -137,6 +141,8 @@ export function Panel({ version, onLogout }: { version: string; onLogout: () => 
           {section === "settings" && <Settings onSaved={() => setShopTick((t) => t + 1)} />}
           {section === "categories" && <Categories />}
           {section === "attributes" && <Attributes />}
+          {section === "pages" && <Pages />}
+          {section === "backup" && <Backup />}
           {section === "account" && <Account version={version} onLogout={onLogout} />}
         </div>
       </div>

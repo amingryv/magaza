@@ -14,11 +14,11 @@ const now = () => new Date().toISOString();
 
 /* ── validation ──────────────────────────────────────────── */
 
-const bad = (msg: string): never => {
+export const bad = (msg: string): never => {
   throw new HttpError(400, msg);
 };
 
-function text(v: unknown, label: string, max: number, required = false): string {
+export function text(v: unknown, label: string, max: number, required = false): string {
   if (v == null) v = "";
   if (typeof v !== "string") bad(`${label}: mətn olmalıdır`);
   const s = (v as string).trim();
@@ -26,18 +26,18 @@ function text(v: unknown, label: string, max: number, required = false): string 
   if (s.length > max) bad(`${label} çox uzundur (maks. ${max})`);
   return s;
 }
-const opt = (v: unknown, label: string, max: number) => text(v, label, max) || null;
+export const opt = (v: unknown, label: string, max: number) => text(v, label, max) || null;
 
-function int(v: unknown, label: string, min: number, max: number): number | null {
+export function int(v: unknown, label: string, min: number, max: number): number | null {
   if (v === null || v === undefined || v === "") return null;
   const n = typeof v === "number" ? v : Number(v);
   if (!Number.isInteger(n) || n < min || n > max) bad(`${label}: yanlış rəqəm`);
   return n;
 }
-const money = (v: unknown, label: string) => int(v, label, 0, 1_000_000_000);
-const flag = (v: unknown) => (v === true || v === 1 || v === "1" ? 1 : 0);
+export const money = (v: unknown, label: string) => int(v, label, 0, 1_000_000_000);
+export const flag = (v: unknown) => (v === true || v === 1 || v === "1" ? 1 : 0);
 
-function translations(v: unknown): string | null {
+export function translations(v: unknown): string | null {
   if (v == null) return null;
   if (typeof v !== "object" || Array.isArray(v)) bad("Tərcümələr yanlışdır");
   const out: Record<string, unknown> = {};
@@ -54,12 +54,12 @@ function translations(v: unknown): string | null {
   return s;
 }
 
-function idList(v: unknown, max = 500): number[] {
+export function idList(v: unknown, max = 500): number[] {
   if (!Array.isArray(v) || !v.length || v.length > max) bad("Siyahı yanlışdır");
   return (v as unknown[]).map((x) => int(x, "id", 1, Number.MAX_SAFE_INTEGER)!);
 }
 
-const parse = <T>(raw: string | null, fallback: T): T => {
+export const parse = <T>(raw: string | null, fallback: T): T => {
   if (!raw) return fallback;
   try {
     return (JSON.parse(raw) as T) ?? fallback;
@@ -76,8 +76,8 @@ const imageKey = (v: unknown): string | null => {
 };
 
 /** "ad" → "ad", or "ad-2", "ad-3"... when taken (by another row). */
-async function uniqueSlug(env: Env, table: "products" | "categories", wanted: string, selfId: number | null): Promise<string> {
-  const base = slugify(wanted) || (table === "products" ? "mehsul" : "kateqoriya");
+export async function uniqueSlug(env: Env, table: "products" | "categories" | "pages", wanted: string, selfId: number | null): Promise<string> {
+  const base = slugify(wanted) || ({ products: "mehsul", categories: "kateqoriya", pages: "sehife" } as const)[table];
   const { results } = await env.DB.prepare(`SELECT slug FROM ${table} WHERE (slug = ?1 OR slug LIKE ?2) AND id != ?3`)
     .bind(base, `${base}-%`, selfId ?? 0)
     .all<{ slug: string }>();
@@ -181,7 +181,7 @@ export const deleteCategory = admin(async ({ env, params, exec }) => {
 });
 
 /** `{ ids: [...] }` in the new order (any subset; positions follow the list). */
-export const reorder = (table: "categories" | "attributes") =>
+export const reorder = (table: "categories" | "attributes" | "pages") =>
   admin(async ({ env, req }) => {
     const ids = idList((await readJson<B>(req)).ids, 1000);
     await env.DB.prepare(
@@ -376,6 +376,12 @@ export const getAdminProduct = admin(async ({ env, params }) => {
   });
 });
 
+/** `products.search_text`: names (all languages), code, category, attribute and variant values. */
+export function searchText(name: string, tr: string | null, sku: string | null, catName: string, attrs: Record<string, unknown>, extra: string[]): string {
+  const trNames = Object.values(parse<Record<string, B>>(tr, {})).map((x) => (typeof x.name === "string" ? x.name : ""));
+  return normalizeSearch([name, ...trNames, sku, catName, ...Object.values(attrs).flat().map(String), ...extra].filter(Boolean).join(" ")).slice(0, 4000);
+}
+
 type VariantIn = { id: number | null; options: string; label: string[]; price: number | null; old_price: number | null; stock: number | null; sku: string | null; image: string | null };
 
 /** Validates a product body. Returns column values plus the variant list. */
@@ -436,12 +442,7 @@ async function productInput(env: Env, body: B, selfId: number | null) {
   const catName = category
     ? ((await env.DB.prepare("SELECT name FROM categories WHERE id = ?").bind(category).first<{ name: string }>())?.name ?? "")
     : "";
-  const trNames = Object.values(parse<Record<string, B>>(tr, {})).map((x) => (typeof x.name === "string" ? x.name : ""));
-  const search = normalizeSearch(
-    [name, ...trNames, sku, catName, ...Object.values(attrs).flat().map(String), ...variants.flatMap((v) => [...v.label, v.sku ?? ""])]
-      .filter(Boolean)
-      .join(" "),
-  ).slice(0, 4000);
+  const search = searchText(name, tr, sku, catName, attrs, variants.flatMap((v) => [...v.label, v.sku ?? ""]));
 
   return {
     category,

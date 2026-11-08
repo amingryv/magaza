@@ -7,6 +7,9 @@ import { createOrder } from "./orders";
 import * as A from "./admin";
 import * as C from "./admin-catalog";
 import * as O from "./admin-orders";
+import * as P from "./admin-pages";
+import * as Bk from "./admin-backup";
+import * as Csv from "./admin-csv";
 
 const router = new Router()
   // Health check: confirms the Worker runs and the migrations reached D1.
@@ -58,7 +61,16 @@ const router = new Router()
   .get("/api/admin/orders", O.listOrders)
   .get("/api/admin/orders/:id", O.getOrder)
   .patch("/api/admin/orders/:id", O.patchOrder)
-  .post("/api/admin/orders/:id/notify", O.notifyOrder);
+  .post("/api/admin/orders/:id/notify", O.notifyOrder)
+  .get("/api/admin/pages", P.listPages)
+  .post("/api/admin/pages", P.createPage)
+  .post("/api/admin/pages/reorder", C.reorder("pages"))
+  .put("/api/admin/pages/:id", P.updatePage)
+  .delete("/api/admin/pages/:id", P.deletePage)
+  .get("/api/admin/export", Bk.exportBackup)
+  .post("/api/admin/import", Bk.importBackup)
+  .get("/api/admin/export/products", Csv.exportProducts)
+  .post("/api/admin/import/products", Csv.importProducts);
 
 export default {
   async fetch(req, env, exec): Promise<Response> {
