@@ -223,7 +223,6 @@ function StoreStep({ s, lang, save, onNext }: { s: S; lang: string; save: (p: S)
         <span className="mb-1.5 block text-[0.88rem] font-medium">Loqo (istəyə görə)</span>
         <div className="flex items-center gap-3">
           <span className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-[16px] bg-tile">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             {logo ? <img src={logo} alt="" className="size-full object-contain" /> : <span className="text-[0.75rem] text-ink-soft">Yoxdur</span>}
           </span>
           <label className="pill pill-soft h-11 cursor-pointer px-4 text-[0.9rem]">

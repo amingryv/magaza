@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { springCurve } from "./spring-curve";
 
 export { springCurve };
@@ -22,48 +21,6 @@ export const springOf = (tune: number) => ({
 /** A preference, read once. */
 export const stillness = () =>
   typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
-/** A number that springs toward its target; parks its loop once settled. */
-export function useSpring(target: number, tune = 50, instant = false) {
-  const [at, setAt] = useState(target);
-  const cur = useRef(target);
-  const vel = useRef(0);
-  const raf = useRef(0);
-
-  useEffect(() => {
-    if (instant) {
-      cur.current = target;
-      vel.current = 0;
-      raf.current = requestAnimationFrame(() => setAt(target));
-      return () => cancelAnimationFrame(raf.current);
-    }
-    const { k, d } = springOf(tune);
-    let prev = 0;
-    const tick = (t: number) => {
-      const dt = prev ? clamp((t - prev) / 16.67, 0, 2.5) : 1;
-      prev = t;
-      vel.current += (target - cur.current) * k * dt;
-      vel.current *= Math.pow(d, dt);
-      cur.current += vel.current * dt;
-      if (Math.abs(target - cur.current) < 0.02 && Math.abs(vel.current) < 0.02) {
-        cur.current = target;
-        vel.current = 0;
-        setAt(target);
-        raf.current = 0;
-        return;
-      }
-      setAt(cur.current);
-      raf.current = requestAnimationFrame(tick);
-    };
-    raf.current = requestAnimationFrame(tick);
-    return () => {
-      cancelAnimationFrame(raf.current);
-      raf.current = 0;
-    };
-  }, [target, tune, instant]);
-
-  return at;
-}
 
 /* ── a physical spring (stiffness k, damping c), stepped at 240 Hz ── */
 export type Spring = { x: number; v: number; to: number; k: number; c: number; held?: boolean };

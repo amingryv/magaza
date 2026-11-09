@@ -4,6 +4,24 @@ Versiya nömrəsi admin panelin **Hesab** bölməsində görünür. Yeniləmək 
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar [SemVer](https://semver.org/).
 
+## [2.2.0] — 2026-11-10
+
+Şablon təmizləndi: hər sahəyə uyğun, GitHub-dan sıfırdan qurulan vəziyyətdədir. Mövcud mağazaların məlumatlarına və ayarlarına toxunulmur.
+
+### Dəyişdi
+- Şəkli olmayan məhsul və kateqoriyalarda boş boz qutu əvəzinə səliqəli rəsm görünür. Rəsm kateqoriyaya uyğun seçilir: geyim, ev və dekor, çanta və aksesuar, kosmetika, ərzaq, elektronika və s. Məhsul səhifəsinin böyük şəkil yerində və ana səhifədəki kateqoriya kartlarında da belədir.
+- Axtarış sahəsindəki nümunə mətn artıq “Telefon, noutbuk…” yox, “Məhsul adı və ya brend…” yazır, yəni istənilən sahəyə uyğundur.
+
+### Silindi
+- Demo elektronika mağazası, onun 67 fotosu və “Şəkil müəllifləri” səhifəsi silindi.
+- İstifadə olunmayan köhnə kod və interfeys mətnləri silindi.
+
+### Proqramçılar üçün
+- Demo yalnız lokal mühitdədir: 4 kateqoriya, 10 şəkilsiz məhsul (variantlar, endirim, stokda olmayan və stoku izlənməyən nümunələr) və 2 statik səhifə.
+- Yeni əmrlər: `npm run setup` (lokal baza + demo), `npm run admin:reset:local` (lokal admin şifrəsini sıfırlayır).
+- README yenidən yazıldı. `.env.example` əlavə olundu: işləmək üçün mühit dəyişəni lazım deyil, fayl yalnız CI deploy üçündür.
+- Node.js 22.18+ tələb olunur.
+
 ## [2.1.0] — 2026-11-10
 
 ### Əlavə olundu

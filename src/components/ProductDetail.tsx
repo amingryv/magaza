@@ -136,9 +136,10 @@ export function ProductDetail({
               setSlide(Math.round(el.scrollLeft / Math.max(1, el.clientWidth)));
             }}
           >
-            {product.images.map((src, i) => (
-              <div key={src} className="detail-hero-slide">
-                <ProductImage product={product} src={src} alt={i === 0 ? name : ""} priority={i === 0} />
+            {/* no photos: one slide with the placeholder drawing */}
+            {(product.images.length ? product.images : [""]).map((src, i) => (
+              <div key={src || "none"} className="detail-hero-slide">
+                <ProductImage product={product} src={src || undefined} alt={i === 0 ? name : ""} priority={i === 0} />
               </div>
             ))}
           </div>

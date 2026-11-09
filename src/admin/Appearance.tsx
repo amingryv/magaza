@@ -176,7 +176,6 @@ function LogoCard({ v, set, fresh }: { v: V; set: SetV; fresh: Set<string> }) {
     <Box title="Loqo" lead="Saytın başlığında və brauzer vərəqində görünür.">
       <div className="flex items-center gap-3">
         <span className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-[16px] bg-paper">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           {v.logo ? <img src={v.logo} alt="" className="size-full object-contain" /> : <span className="text-[0.75rem] text-ink-soft">Yoxdur</span>}
         </span>
         <label className="pill pill-soft h-11 cursor-pointer bg-paper px-4 text-[0.9rem]">
@@ -300,7 +299,6 @@ function BannersCard({
         {banners.map((b, i) => (
           <div key={b.image} className="grid gap-3 rounded-[16px] bg-paper p-3">
             <div className="flex items-start gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={b.image} alt="" className="aspect-[16/9] w-36 shrink-0 rounded-[12px] bg-tile object-cover" />
               <div className="ml-auto flex gap-1">
                 <IconBtn label="Yuxarı" disabled={i === 0} onClick={() => move(i, -1)} className="bg-paper-2">
@@ -382,7 +380,6 @@ function Preview({ v, main }: { v: V; main: string }) {
   return (
     <section aria-label="Önizləmə" className="overflow-hidden rounded-[20px] bg-white text-[#0a0a0a] outline outline-1 -outline-offset-1 outline-ink-line-2" style={{ fontFamily: fontCss(v.font) }}>
       <div className="flex items-center gap-2 px-4 py-3">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         {v.logo && <img src={v.logo} alt="" className="size-7 rounded-[8px] object-contain" />}
         <span className="text-[0.95rem] font-[650]" style={{ color: v.ink }}>
           {name}
@@ -394,7 +391,6 @@ function Preview({ v, main }: { v: V; main: string }) {
       <div className="px-4">
         {b ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={b.image} alt="" className="aspect-[16/9] w-full rounded-[14px] object-cover" />
             {title && <p className="mt-1.5 text-[0.85rem] font-[650]">{title}</p>}
           </>

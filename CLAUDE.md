@@ -10,7 +10,9 @@ npm run worker:dev        # Worker + lokal D1/R2 (:8787) — dev zamanı yuxarı
 npm run build             # next build (statik export → out/) + scripts/flatten-rsc.mjs
 npm run preview           # build + lokal migration + wrangler dev: production-a ən yaxın (:8787)
 npm run db:migrate:local  # migrations/ → lokal D1 (.wrangler/state)
-npm run db:seed:local     # demo mağaza "İlmə": seed/demo.sql → lokal D1, seed/images → lokal R2
+npm run db:seed:local     # demo: seed/demo-catalog.ts (10 məhsul, şəkilsiz) → seed/demo.sql → lokal D1
+npm run setup             # migrate + seed (sıfırdan lokal quraşdırma)
+npm run admin:reset:local # lokal admin şifrəsini sıfırla → /admin sihirbazı
 npm run typecheck         # tsc front + tsc -p worker
 npm run lint
 npm run cf-typegen        # wrangler.jsonc dəyişəndən sonra → worker-configuration.d.ts (Env)

@@ -1,448 +1,232 @@
-import type { Catalog } from "@/lib/catalog-types";
-import { appleCategories, appleProducts } from "./demo-apple.ts";
-
 /**
- * DEMO DATA. Synthetic prices and stock for the electronics demo.
- * Replaced by the owner's own products from D1 (`/api/catalog`) later.
- * Photos: openly licensed, credited in seed/images/credits.json (seeded as the "photo-credits" page).
+ * DEMO DATA for local development only (npm run db:seed:local).
+ * Ten sector-neutral products without photos: the storefront draws its own
+ * placeholder frame (src/components/ProductImage.tsx) for every missing picture.
+ * Prices are in manat here; the seed script stores them as qəpik.
+ * Not typechecked (seed/ is excluded in tsconfig); plain Node strips the types.
  */
-export const demoCatalog: Catalog = {
+
+type LT = { az: string; ru?: string; en?: string };
+type Value = { id: string; name: LT; swatch?: string };
+type Option = { id: string; name: LT; values: Value[] };
+type Variant = { id: string; values: Record<string, string>; price: number; oldPrice?: number; stock: number | null };
+type Spec = { name: LT; value: LT };
+type DemoProduct = {
+  slug: string;
+  category: string;
+  brand: string;
+  name: LT;
+  summary: LT;
+  description: LT;
+  options: Option[];
+  variants: Variant[];
+  specs: Spec[];
+  featured?: boolean;
+  addedAt: string;
+};
+
+const size: Option = {
+  id: "size",
+  name: { az: "Ölçü", ru: "Размер", en: "Size" },
+  values: ["S", "M", "L", "XL"].map((s) => ({ id: s.toLowerCase(), name: { az: s } })),
+};
+const colour = (values: Value[]): Option => ({ id: "color", name: { az: "Rəng", ru: "Цвет", en: "Colour" }, values });
+const black: Value = { id: "black", name: { az: "Qara", ru: "Чёрный", en: "Black" }, swatch: "#111111" };
+const white: Value = { id: "white", name: { az: "Ağ", ru: "Белый", en: "White" }, swatch: "#ffffff" };
+const brown: Value = { id: "brown", name: { az: "Qəhvəyi", ru: "Коричневый", en: "Brown" }, swatch: "#7a4a2a" };
+const beige: Value = { id: "beige", name: { az: "Bej", ru: "Бежевый", en: "Beige" }, swatch: "#d9c8a9" };
+
+const material = (az: string, ru: string, en: string): Spec => ({ name: { az: "Material", ru: "Материал", en: "Material" }, value: { az, ru, en } });
+const warranty = (years: number): Spec => ({
+  name: { az: "Zəmanət", ru: "Гарантия", en: "Warranty" },
+  value: { az: `${years} il`, ru: `${years} год`, en: `${years} year` },
+});
+/** one product without options: a single variant carrying the price and stock */
+const single = (price: number, stock: number | null, oldPrice?: number): Variant[] => [{ id: "0", values: {}, price, oldPrice, stock }];
+
+export const demoCatalog: { categories: { id: string; name: LT }[]; products: DemoProduct[] } = {
   categories: [
-    { id: "phones", name: { az: "Telefonlar", ru: "Телефоны", en: "Phones" }, image: "/demo/iphone-17-pro-silver.jpg" },
-    { id: "laptops", name: { az: "Noutbuklar", ru: "Ноутбуки", en: "Laptops" }, image: "/demo/macbook-air-13.jpg" },
-    ...appleCategories,
-    { id: "tablets", name: { az: "Planşetlər", ru: "Планшеты", en: "Tablets" }, image: "/demo/ipad-pro-store.jpg" },
-    { id: "audio", name: { az: "Səs", ru: "Аудио", en: "Audio" }, image: "/demo/airpods-max.jpg" },
-    { id: "watches", name: { az: "Smart saatlar", ru: "Смарт-часы", en: "Smartwatches" }, image: "/demo/watch-ultra-3.jpg" },
-    { id: "gaming", name: { az: "Oyun", ru: "Игры", en: "Gaming" }, image: "/demo/playstation-5.png" },
-    { id: "accessories", name: { az: "Aksesuarlar", ru: "Аксессуары", en: "Accessories" }, image: "/demo/mx-master.jpg" },
+    { id: "geyim", name: { az: "Geyim", ru: "Одежда", en: "Clothing" } },
+    { id: "ev-ve-dekor", name: { az: "Ev və dekor", ru: "Дом и декор", en: "Home & decor" } },
+    { id: "elektronika", name: { az: "Elektronika", ru: "Электроника", en: "Electronics" } },
+    { id: "aksesuarlar", name: { az: "Aksesuarlar", ru: "Аксессуары", en: "Accessories" } },
   ],
   products: [
-    ...appleProducts,
     {
-      id: "p1",
-      slug: "iphone-15-pro",
-      tone: "sand",
-      category: "phones",
-      brand: "Apple",
-      name: { az: "iPhone 15 Pro" },
-      summary: {
-        az: "Titan korpus, A17 Pro çipi, 48 MP kamera",
-        ru: "Титановый корпус, чип A17 Pro, камера 48 Мп",
-        en: "Titanium body, A17 Pro chip, 48 MP camera",
-      },
+      slug: "pambiq-koynek",
+      category: "geyim",
+      brand: "Nord",
+      name: { az: "Pambıq köynək", ru: "Хлопковая рубашка", en: "Cotton shirt" },
+      summary: { az: "Yumşaq pambıq, sərbəst biçim", ru: "Мягкий хлопок, свободный крой", en: "Soft cotton, relaxed fit" },
       description: {
-        az: "Yüngül titan korpus, 6,1 düymlük ekran və USB‑C. Rəsmi zəmanət, qutuda kabel.",
-        ru: "Лёгкий титановый корпус, экран 6,1 дюйма и USB‑C. Официальная гарантия, кабель в комплекте.",
-        en: "Light titanium body, 6.1-inch display and USB‑C. Official warranty, cable in the box.",
+        az: "Gündəlik geyim üçün 100% pambıq köynək. 30 °C-də yuyula bilər.",
+        ru: "Рубашка из 100% хлопка на каждый день. Стирка при 30 °C.",
+        en: "Everyday shirt in 100% cotton. Machine wash at 30 °C.",
       },
-      images: ["/demo/iphone-15-pro.png"],
-      options: [
-        {
-          id: "memory",
-          name: { az: "Yaddaş", ru: "Память", en: "Storage" },
-          values: [
-            { id: "128", name: { az: "128 GB" } },
-            { id: "256", name: { az: "256 GB" } },
-            { id: "512", name: { az: "512 GB" } },
-          ],
-        },
-        {
-          id: "color",
-          name: { az: "Rəng", ru: "Цвет", en: "Colour" },
-          values: [
-            { id: "black", name: { az: "Qara titan", ru: "Чёрный титан", en: "Black titanium" }, swatch: "#2b2b2d" },
-            { id: "natural", name: { az: "Təbii titan", ru: "Натуральный титан", en: "Natural titanium" }, swatch: "#bab4a8" },
-          ],
-        },
-      ],
-      variants: [
-        { id: "128-black", values: { memory: "128", color: "black" }, price: 2399, stock: 6 },
-        { id: "128-natural", values: { memory: "128", color: "natural" }, price: 2399, stock: 2 },
-        { id: "256-black", values: { memory: "256", color: "black" }, price: 2699, stock: 4 },
-        { id: "256-natural", values: { memory: "256", color: "natural" }, price: 2699, stock: 5 },
-        { id: "512-black", values: { memory: "512", color: "black" }, price: 3199, stock: 1 },
-        { id: "512-natural", values: { memory: "512", color: "natural" }, price: 3199, stock: 0 },
-      ],
-      specs: [
-        { name: { az: "Ekran", ru: "Экран", en: "Display" }, value: { az: "6,1″ OLED, 120 Hz" } },
-        { name: { az: "Çip", ru: "Чип", en: "Chip" }, value: { az: "A17 Pro" } },
-        { name: { az: "Kamera", ru: "Камера", en: "Camera" }, value: { az: "48 + 12 + 12 MP" } },
-        { name: { az: "Zəmanət", ru: "Гарантия", en: "Warranty" }, value: { az: "1 il", ru: "1 год", en: "1 year" } },
-      ],
-      featured: false,
-      addedAt: "2026-10-28",
+      options: [size, colour([white, black])],
+      variants: ["s", "m", "l", "xl"].flatMap((s, i) => [
+        { id: `${s}-white`, values: { size: s, color: "white" }, price: 39, stock: [4, 8, 6, 0][i] },
+        { id: `${s}-black`, values: { size: s, color: "black" }, price: 39, stock: [3, 5, 2, 1][i] },
+      ]),
+      specs: [material("Pambıq", "Хлопок", "Cotton")],
+      featured: true,
+      addedAt: "2026-11-01",
     },
     {
-      id: "p2",
-      slug: "galaxy-s23-ultra",
-      tone: "blue",
-      category: "phones",
-      brand: "Samsung",
-      name: { az: "Galaxy S23 Ultra" },
-      summary: {
-        az: "200 MP kamera, S Pen qələmi, 5000 mAh batareya",
-        ru: "Камера 200 Мп, перо S Pen, батарея 5000 мА·ч",
-        en: "200 MP camera, S Pen, 5000 mAh battery",
-      },
+      slug: "keten-salvar",
+      category: "geyim",
+      brand: "Nord",
+      name: { az: "Kətan şalvar", ru: "Льняные брюки", en: "Linen trousers" },
+      summary: { az: "Yay üçün yüngül kətan", ru: "Лёгкий лён для лета", en: "Light linen for summer" },
       description: {
-        az: "Böyük 6,8 düymlük ekran, korpusa yerləşən S Pen qələmi və gecə çəkilişində güclü kamera.",
-        ru: "Большой экран 6,8 дюйма, встроенное перо S Pen и сильная камера для ночной съёмки.",
-        en: "Large 6.8-inch display, built-in S Pen and a camera that is strong at night.",
+        az: "Rezinli bel və iki cib. Təbii kətan nəfəs alır və isti havada rahatdır.",
+        ru: "Эластичный пояс и два кармана. Натуральный лён дышит и удобен в жару.",
+        en: "Elastic waist and two pockets. Natural linen breathes and stays cool in the heat.",
       },
-      images: ["/demo/galaxy-s23-ultra.png", "/demo/galaxy-s23-colours.jpg"],
-      options: [
-        {
-          id: "memory",
-          name: { az: "Yaddaş", ru: "Память", en: "Storage" },
-          values: [
-            { id: "256", name: { az: "256 GB" } },
-            { id: "512", name: { az: "512 GB" } },
-          ],
-        },
-      ],
-      variants: [
-        { id: "256", values: { memory: "256" }, price: 2199, oldPrice: 2499, stock: 7 },
-        { id: "512", values: { memory: "512" }, price: 2499, oldPrice: 2799, stock: 3 },
-      ],
-      specs: [
-        { name: { az: "Ekran", ru: "Экран", en: "Display" }, value: { az: "6,8″ AMOLED, 120 Hz" } },
-        { name: { az: "Kamera", ru: "Камера", en: "Camera" }, value: { az: "200 MP" } },
-        { name: { az: "Batareya", ru: "Батарея", en: "Battery" }, value: { az: "5000 mAh" } },
-      ],
-      featured: false,
+      options: [{ ...size, values: size.values.slice(0, 3) }],
+      variants: ["s", "m", "l"].map((s, i) => ({ id: s, values: { size: s }, price: 59, oldPrice: 75, stock: [2, 6, 3][i] })),
+      specs: [material("Kətan", "Лён", "Linen")],
       addedAt: "2026-10-20",
     },
     {
-      id: "p3",
-      slug: "macbook-pro-15",
-      tone: "sand",
-      category: "laptops",
-      brand: "Apple",
-      name: { az: "MacBook Pro 15″" },
-      summary: {
-        az: "Retina ekran, Touch Bar, 16 GB yaddaş",
-        ru: "Экран Retina, Touch Bar, 16 ГБ памяти",
-        en: "Retina display, Touch Bar, 16 GB memory",
-      },
+      slug: "yun-sviter",
+      category: "geyim",
+      brand: "Arka",
+      name: { az: "Yun sviter", ru: "Шерстяной свитер", en: "Wool sweater" },
+      summary: { az: "İsti, yumşaq toxuma", ru: "Тёплая мягкая вязка", en: "Warm, soft knit" },
       description: {
-        az: "Dizayn və montaj üçün böyük Retina ekranlı noutbuk. Yoxlanılıb, batareya vəziyyəti yaxşıdır.",
-        ru: "Ноутбук с большим экраном Retina для дизайна и монтажа. Проверен, батарея в хорошем состоянии.",
-        en: "A large Retina laptop for design and editing. Checked, battery in good health.",
+        az: "Merinos yunundan klassik sviter. Bu məhsul hazırda stokda yoxdur — demo üçün.",
+        ru: "Классический свитер из шерсти мериноса. Сейчас нет в наличии — для демо.",
+        en: "A classic merino wool sweater. Currently out of stock — for the demo.",
       },
-      images: ["/demo/macbook-pro.jpg"],
-      options: [
-        {
-          id: "ssd",
-          name: { az: "Disk", ru: "Диск", en: "Storage" },
-          values: [
-            { id: "512", name: { az: "512 GB SSD" } },
-            { id: "1tb", name: { az: "1 TB SSD" } },
-          ],
-        },
-      ],
+      options: [],
+      variants: single(89, 0),
+      specs: [material("Merinos yunu", "Шерсть мериноса", "Merino wool")],
+      addedAt: "2026-09-15",
+    },
+    {
+      slug: "keramika-vaza",
+      category: "ev-ve-dekor",
+      brand: "Lumo",
+      name: { az: "Keramika vaza", ru: "Керамическая ваза", en: "Ceramic vase" },
+      summary: { az: "Əl işi, mat şirli", ru: "Ручная работа, матовая глазурь", en: "Handmade, matte glaze" },
+      description: {
+        az: "Hər vaza əl ilə hazırlanır, ona görə forması bir az fərqli ola bilər. Hündürlüyü 24 sm.",
+        ru: "Каждая ваза сделана вручную, поэтому форма может немного отличаться. Высота 24 см.",
+        en: "Every vase is made by hand, so the shape may vary slightly. 24 cm tall.",
+      },
+      options: [],
+      variants: single(45, 12),
+      specs: [material("Keramika", "Керамика", "Ceramic"), { name: { az: "Hündürlük", ru: "Высота", en: "Height" }, value: { az: "24 sm", ru: "24 см", en: "24 cm" } }],
+      featured: true,
+      addedAt: "2026-10-28",
+    },
+    {
+      slug: "soya-sami",
+      category: "ev-ve-dekor",
+      brand: "Lumo",
+      name: { az: "Soya şamı", ru: "Соевая свеча", en: "Soy candle" },
+      summary: { az: "40 saat yanma müddəti", ru: "40 часов горения", en: "40 hours burn time" },
+      description: {
+        az: "Təbii soya mumu və pambıq fitil. Stoku izlənmir — həmişə sifariş vermək olar.",
+        ru: "Натуральный соевый воск и хлопковый фитиль. Остаток не отслеживается — заказ доступен всегда.",
+        en: "Natural soy wax and a cotton wick. Stock is not tracked, so it can always be ordered.",
+      },
+      options: [],
+      variants: single(18, null),
+      specs: [{ name: { az: "Yanma müddəti", ru: "Время горения", en: "Burn time" }, value: { az: "40 saat", ru: "40 часов", en: "40 hours" } }],
+      addedAt: "2026-10-05",
+    },
+    {
+      slug: "simsiz-qulaqliq",
+      category: "elektronika",
+      brand: "Arka",
+      name: { az: "Simsiz qulaqlıq", ru: "Беспроводные наушники", en: "Wireless headphones" },
+      summary: { az: "Səs-küyü azaldan, 30 saat batareya", ru: "Шумоподавление, 30 часов работы", en: "Noise cancelling, 30-hour battery" },
+      description: {
+        az: "Qatlanan dizayn, USB‑C ilə sürətli şarj və qutuda daşıma çantası.",
+        ru: "Складная конструкция, быстрая зарядка по USB‑C и чехол в комплекте.",
+        en: "Folding design, fast USB‑C charging and a carrying case in the box.",
+      },
+      options: [colour([black, white])],
       variants: [
-        { id: "512", values: { ssd: "512" }, price: 2899, stock: 3 },
-        { id: "1tb", values: { ssd: "1tb" }, price: 3299, stock: 2 },
+        { id: "black", values: { color: "black" }, price: 129, stock: 7 },
+        { id: "white", values: { color: "white" }, price: 139, stock: 3 },
       ],
-      specs: [
-        { name: { az: "Ekran", ru: "Экран", en: "Display" }, value: { az: "15,4″ Retina" } },
-        { name: { az: "Operativ yaddaş", ru: "Оперативная память", en: "Memory" }, value: { az: "16 GB" } },
-        { name: { az: "Çəki", ru: "Вес", en: "Weight" }, value: { az: "1,83 kq", ru: "1,83 кг", en: "1.83 kg" } },
-      ],
-      addedAt: "2026-09-30",
+      specs: [{ name: { az: "Batareya", ru: "Батарея", en: "Battery" }, value: { az: "30 saat", ru: "30 часов", en: "30 hours" } }, warranty(1)],
+      featured: true,
+      addedAt: "2026-11-05",
     },
     {
-      id: "p4",
-      slug: "ipad-air",
-      tone: "blue",
-      category: "tablets",
-      brand: "Apple",
-      name: { az: "iPad Air" },
-      summary: {
-        az: "9,7 düymlük Retina, yüngül alüminium korpus",
-        ru: "Retina 9,7 дюйма, лёгкий алюминиевый корпус",
-        en: "9.7-inch Retina, light aluminium body",
-      },
+      slug: "smart-saat",
+      category: "elektronika",
+      brand: "Arka",
+      name: { az: "Smart saat", ru: "Смарт-часы", en: "Smartwatch" },
+      summary: { az: "Nəbz, addım və yuxu izləmə", ru: "Пульс, шаги и сон", en: "Heart rate, steps and sleep" },
       description: {
-        az: "Oxumaq, film və dərs üçün rahat planşet. Cəmi 469 qram.",
-        ru: "Удобный планшет для чтения, фильмов и учёбы. Всего 469 граммов.",
-        en: "A comfortable tablet for reading, films and study. Just 469 grams.",
+        az: "Suya davamlı korpus və bir həftəlik batareya. Telefona bildirişlər gəlir.",
+        ru: "Водозащищённый корпус и неделя без подзарядки. Уведомления с телефона.",
+        en: "Water-resistant case and a week of battery. Shows phone notifications.",
       },
-      images: ["/demo/ipad-air.png"],
-      options: [
-        {
-          id: "memory",
-          name: { az: "Yaddaş", ru: "Память", en: "Storage" },
-          values: [
-            { id: "64", name: { az: "64 GB" } },
-            { id: "256", name: { az: "256 GB" } },
-          ],
-        },
-      ],
+      options: [],
+      variants: single(249, 5, 299),
+      specs: [{ name: { az: "Ekran", ru: "Экран", en: "Display" }, value: { az: "1,4″ AMOLED" } }, warranty(1)],
+      addedAt: "2026-10-12",
+    },
+    {
+      slug: "powerbank-10000",
+      category: "elektronika",
+      brand: "Nord",
+      name: { az: "Powerbank 10 000 mAh", ru: "Powerbank 10 000 мА·ч", en: "Power bank 10,000 mAh" },
+      summary: { az: "Kiçik, iki çıxışlı", ru: "Компактный, два выхода", en: "Compact, two outputs" },
+      description: {
+        az: "Telefonu iki dəfəyə qədər doldurur. USB‑C və USB‑A çıxışları.",
+        ru: "Заряжает телефон до двух раз. Выходы USB‑C и USB‑A.",
+        en: "Charges a phone up to twice. USB‑C and USB‑A outputs.",
+      },
+      options: [],
+      variants: single(49, 30),
+      specs: [{ name: { az: "Tutum", ru: "Ёмкость", en: "Capacity" }, value: { az: "10 000 mAh" } }, warranty(1)],
+      addedAt: "2026-08-30",
+    },
+    {
+      slug: "deri-pul-kisesi",
+      category: "aksesuarlar",
+      brand: "Lumo",
+      name: { az: "Dəri pul kisəsi", ru: "Кожаный кошелёк", en: "Leather wallet" },
+      summary: { az: "Təbii dəri, 6 kart yeri", ru: "Натуральная кожа, 6 карт", en: "Genuine leather, 6 card slots" },
+      description: {
+        az: "İncə və möhkəm. Zamanla gözəl patina əmələ gətirir.",
+        ru: "Тонкий и прочный. Со временем приобретает красивую патину.",
+        en: "Slim and sturdy. Develops a beautiful patina over time.",
+      },
+      options: [colour([brown, black])],
       variants: [
-        { id: "64", values: { memory: "64" }, price: 699, stock: 8 },
-        { id: "256", values: { memory: "256" }, price: 899, stock: 4 },
+        { id: "brown", values: { color: "brown" }, price: 55, stock: 9 },
+        { id: "black", values: { color: "black" }, price: 55, stock: 4 },
       ],
-      specs: [
-        { name: { az: "Ekran", ru: "Экран", en: "Display" }, value: { az: "9,7″ Retina" } },
-        { name: { az: "Çəki", ru: "Вес", en: "Weight" }, value: { az: "469 q", ru: "469 г", en: "469 g" } },
-      ],
-      addedAt: "2026-09-12",
+      specs: [material("Təbii dəri", "Натуральная кожа", "Genuine leather")],
+      featured: true,
+      addedAt: "2026-11-03",
     },
     {
-      id: "p5",
-      slug: "airpods-pro",
-      tone: "sand",
-      fit: "cover",
-      category: "audio",
-      brand: "Apple",
-      name: { az: "AirPods Pro (2-ci nəsil)", ru: "AirPods Pro (2-го поколения)", en: "AirPods Pro (2nd generation)" },
-      summary: {
-        az: "Aktiv səs-küy söndürmə, USB‑C qutusu",
-        ru: "Активное шумоподавление, кейс USB‑C",
-        en: "Active noise cancelling, USB‑C case",
-      },
+      slug: "keten-canta",
+      category: "aksesuarlar",
+      brand: "Nord",
+      name: { az: "Kətan çanta", ru: "Льняная сумка", en: "Linen tote bag" },
+      summary: { az: "Gündəlik alış-veriş üçün", ru: "Для покупок на каждый день", en: "For everyday shopping" },
       description: {
-        az: "Səs-küyü söndürür, şəffaf rejimdə ətrafı eşidirsiniz. Qutu ilə 30 saata qədər işləyir.",
-        ru: "Подавляют шум, в прозрачном режиме слышно окружение. До 30 часов с кейсом.",
-        en: "Cancels noise, transparency mode lets the world in. Up to 30 hours with the case.",
+        az: "Geniş və yüngül, daxili cibi var. 10 kq-a qədər yük daşıyır.",
+        ru: "Вместительная и лёгкая, с внутренним карманом. Выдерживает до 10 кг.",
+        en: "Roomy and light with an inner pocket. Carries up to 10 kg.",
       },
-      images: ["/demo/airpods-pro.jpg", "/demo/airpods-pro-case.jpg"],
-      options: [],
-      variants: [{ id: "default", values: {}, price: 449, stock: 12 }],
-      specs: [
-        { name: { az: "İş vaxtı", ru: "Время работы", en: "Battery life" }, value: { az: "6 saat (qutu ilə 30)", ru: "6 ч (с кейсом 30)", en: "6 h (30 with case)" } },
-        { name: { az: "Qoşulma", ru: "Подключение", en: "Connection" }, value: { az: "Bluetooth 5.3" } },
-      ],
-      featured: false,
-      addedAt: "2026-10-25",
-    },
-    {
-      id: "p6",
-      slug: "jbl-go-2",
-      tone: "blue",
-      fit: "cover",
-      category: "audio",
-      brand: "JBL",
-      name: { az: "JBL GO 2" },
-      summary: {
-        az: "Cibə sığan, suya davamlı kolonka",
-        ru: "Карманная влагозащищённая колонка",
-        en: "Pocket-size, water-resistant speaker",
-      },
-      description: {
-        az: "Ovucunuza sığır, IPX7 ilə suya davamlıdır. 5 saata qədər musiqi.",
-        ru: "Помещается в ладони, защита IPX7. До 5 часов музыки.",
-        en: "Fits in your palm, IPX7 water resistant. Up to 5 hours of music.",
-      },
-      images: ["/demo/jbl-go2.jpg"],
-      options: [
-        {
-          id: "color",
-          name: { az: "Rəng", ru: "Цвет", en: "Colour" },
-          values: [
-            { id: "blue", name: { az: "Göy", ru: "Синий", en: "Blue" }, swatch: "#23407a" },
-            { id: "black", name: { az: "Qara", ru: "Чёрный", en: "Black" }, swatch: "#1e1e1e" },
-          ],
-        },
-      ],
+      options: [colour([beige, black])],
       variants: [
-        { id: "blue", values: { color: "blue" }, price: 59, stock: 15 },
-        { id: "black", values: { color: "black" }, price: 59, stock: 9 },
+        { id: "beige", values: { color: "beige" }, price: 25, oldPrice: 32, stock: 15 },
+        { id: "black", values: { color: "black" }, price: 25, oldPrice: 32, stock: 6 },
       ],
-      specs: [
-        { name: { az: "Qoruma", ru: "Защита", en: "Protection" }, value: { az: "IPX7" } },
-        { name: { az: "İş vaxtı", ru: "Время работы", en: "Battery life" }, value: { az: "5 saat", ru: "5 ч", en: "5 h" } },
-      ],
-      addedAt: "2026-08-14",
-    },
-    {
-      id: "p7",
-      slug: "apple-watch-series-4",
-      tone: "coral",
-      category: "watches",
-      brand: "Apple",
-      name: { az: "Apple Watch Series 4, 40 mm" },
-      summary: {
-        az: "EKQ, yıxılma aşkarlanması, alüminium korpus",
-        ru: "ЭКГ, обнаружение падения, алюминиевый корпус",
-        en: "ECG, fall detection, aluminium case",
-      },
-      description: {
-        az: "Nəbzi, yuxunu və idmanı izləyir. Bildirişləri telefonu çıxarmadan görürsünüz.",
-        ru: "Следит за пульсом, сном и спортом. Уведомления видно, не доставая телефон.",
-        en: "Tracks heart rate, sleep and workouts. See notifications without reaching for your phone.",
-      },
-      images: ["/demo/apple-watch.jpg"],
-      options: [],
-      variants: [{ id: "default", values: {}, price: 389, stock: 2 }],
-      specs: [
-        { name: { az: "Korpus", ru: "Корпус", en: "Case" }, value: { az: "40 mm, alüminium", ru: "40 мм, алюминий", en: "40 mm, aluminium" } },
-        { name: { az: "Rəng", ru: "Цвет", en: "Colour" }, value: { az: "Kosmik boz", ru: "Серый космос", en: "Space grey" } },
-      ],
-      addedAt: "2026-07-03",
-    },
-    {
-      id: "p8",
-      slug: "playstation-5",
-      tone: "blue",
-      category: "gaming",
-      brand: "Sony",
-      name: { az: "PlayStation 5" },
-      summary: {
-        az: "Disk sürücülü versiya, DualSense pultu ilə",
-        ru: "Версия с дисководом, с геймпадом DualSense",
-        en: "Disc edition, with DualSense controller",
-      },
-      description: {
-        az: "Sürətli SSD, 4K oyunlar və titrəyişi hiss etdirən DualSense pultu.",
-        ru: "Быстрый SSD, игры в 4K и геймпад DualSense с тактильной отдачей.",
-        en: "Fast SSD, 4K games and the DualSense controller with haptic feedback.",
-      },
-      images: ["/demo/playstation-5.png"],
-      options: [],
-      variants: [{ id: "default", values: {}, price: 1149, oldPrice: 1299, stock: 5 }],
-      specs: [
-        { name: { az: "Disk", ru: "Диск", en: "Storage" }, value: { az: "825 GB SSD" } },
-        { name: { az: "Görüntü", ru: "Изображение", en: "Video" }, value: { az: "4K, 120 Hz-ə qədər", ru: "4K, до 120 Гц", en: "4K, up to 120 Hz" } },
-      ],
-      featured: false,
-      addedAt: "2026-10-30",
-    },
-    {
-      id: "p9",
-      slug: "nintendo-switch",
-      tone: "coral",
-      category: "gaming",
-      brand: "Nintendo",
-      name: { az: "Nintendo Switch" },
-      summary: {
-        az: "Həm televizorda, həm əlinizdə oynayın",
-        ru: "Играйте и на телевизоре, и в руках",
-        en: "Play on the TV or in your hands",
-      },
-      description: {
-        az: "Joy‑Con pultlarını çıxarıb iki nəfərlə oynamaq olar. Səfər üçün ideal.",
-        ru: "Снимите Joy‑Con и играйте вдвоём. Идеально в дорогу.",
-        en: "Slide off the Joy‑Con and play with two. Made for trips.",
-      },
-      images: ["/demo/nintendo-switch.png"],
-      options: [],
-      variants: [{ id: "default", values: {}, price: 599, stock: 6 }],
-      specs: [
-        { name: { az: "Ekran", ru: "Экран", en: "Display" }, value: { az: "6,2″" } },
-        { name: { az: "Yaddaş", ru: "Память", en: "Storage" }, value: { az: "32 GB" } },
-      ],
-      addedAt: "2026-10-02",
-    },
-    {
-      id: "p10",
-      slug: "steam-deck",
-      tone: "sand",
-      category: "gaming",
-      brand: "Valve",
-      name: { az: "Steam Deck" },
-      summary: {
-        az: "Steam kitabxananız cibinizdə",
-        ru: "Ваша библиотека Steam в руках",
-        en: "Your Steam library in your hands",
-      },
-      description: {
-        az: "Kompüter oyunlarını hər yerdə oynayın. 7 düymlük ekran və tam ölçülü idarəetmə.",
-        ru: "Играйте в компьютерные игры где угодно. Экран 7 дюймов и полноразмерное управление.",
-        en: "Play PC games anywhere. A 7-inch screen and full-size controls.",
-      },
-      images: ["/demo/steam-deck.png"],
-      options: [
-        {
-          id: "memory",
-          name: { az: "Yaddaş", ru: "Память", en: "Storage" },
-          values: [
-            { id: "256", name: { az: "256 GB" } },
-            { id: "512", name: { az: "512 GB" } },
-          ],
-        },
-      ],
-      variants: [
-        { id: "256", values: { memory: "256" }, price: 899, stock: 3 },
-        { id: "512", values: { memory: "512" }, price: 1099, stock: 2 },
-      ],
-      specs: [
-        { name: { az: "Ekran", ru: "Экран", en: "Display" }, value: { az: "7″, 1280×800" } },
-        { name: { az: "Çəki", ru: "Вес", en: "Weight" }, value: { az: "669 q", ru: "669 г", en: "669 g" } },
-      ],
-      addedAt: "2026-10-18",
-    },
-    {
-      id: "p11",
-      slug: "switch-pro-controller",
-      tone: "coral",
-      category: "gaming",
-      brand: "Nintendo",
-      name: { az: "Switch Pro Controller" },
-      summary: {
-        az: "Uzun oyunlar üçün rahat pult",
-        ru: "Удобный геймпад для долгих игр",
-        en: "A comfortable controller for long sessions",
-      },
-      description: {
-        az: "Tam ölçülü düymələr və 40 saata qədər batareya.",
-        ru: "Полноразмерные кнопки и до 40 часов работы.",
-        en: "Full-size buttons and up to 40 hours of battery.",
-      },
-      images: ["/demo/switch-pro-controller.jpg"],
-      options: [],
-      variants: [{ id: "default", values: {}, price: 139, stock: 0 }],
-      specs: [{ name: { az: "İş vaxtı", ru: "Время работы", en: "Battery life" }, value: { az: "40 saat", ru: "40 ч", en: "40 h" } }],
-      addedAt: "2026-06-21",
-    },
-    {
-      id: "p12",
-      slug: "logitech-mx-master",
-      tone: "sand",
-      category: "accessories",
-      brand: "Logitech",
-      name: { az: "Logitech MX Master" },
-      summary: {
-        az: "Üç cihaz arasında keçid edən simsiz siçan",
-        ru: "Беспроводная мышь для трёх устройств",
-        en: "Wireless mouse that switches between three devices",
-      },
-      description: {
-        az: "Əl üçün formalı korpus, sürətli təkər və USB qəbuledici qutuda.",
-        ru: "Форма по руке, быстрое колесо и USB-приёмник в комплекте.",
-        en: "Hand-shaped body, fast scroll wheel and USB receiver included.",
-      },
-      images: ["/demo/mx-master.jpg"],
-      options: [],
-      variants: [{ id: "default", values: {}, price: 169, stock: 10 }],
-      specs: [{ name: { az: "Qoşulma", ru: "Подключение", en: "Connection" }, value: { az: "Bluetooth, USB" } }],
-      addedAt: "2026-05-11",
-    },
-    {
-      id: "p13",
-      slug: "logitech-g512-x-98",
-      tone: "blue",
-      fit: "cover",
-      category: "accessories",
-      brand: "Logitech",
-      name: { az: "Logitech G512 X 98" },
-      summary: {
-        az: "Kompakt mexaniki klaviatura",
-        ru: "Компактная механическая клавиатура",
-        en: "Compact mechanical keyboard",
-      },
-      description: {
-        az: "Rəqəm blokunu saxlayan, amma yer tutmayan 98% düzülüş.",
-        ru: "Раскладка 98%: цифровой блок на месте, а места занимает меньше.",
-        en: "A 98% layout that keeps the number pad but saves space.",
-      },
-      images: ["/demo/keyboard-98.jpg"],
-      options: [],
-      variants: [{ id: "default", values: {}, price: 249, stock: 4 }],
-      specs: [{ name: { az: "Düzülüş", ru: "Раскладка", en: "Layout" }, value: { az: "98%" } }],
-      addedAt: "2026-10-10",
+      specs: [material("Kətan", "Лён", "Linen")],
+      addedAt: "2026-09-02",
     },
   ],
 };

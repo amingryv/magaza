@@ -93,7 +93,6 @@ function Banners() {
           const sub = tr(b.subtitle, lang);
           const body = (
             <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={b.image} alt={title} className="aspect-[16/9] w-full rounded-[22px] bg-tile object-cover" loading={i ? "lazy" : "eager"} />
               {(title || sub) && (
                 <span className="mt-3 block px-1">
@@ -130,10 +129,11 @@ function FeaturedCategories() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {picked.map((c) => (
           <Link key={c.id} href={href(`/catalog/?c=${c.id}`)} className="group block">
-            <span className="block aspect-[4/3] overflow-hidden rounded-[18px] bg-tile">
-              {c.image && (
-                // eslint-disable-next-line @next/next/no-img-element
+            <span className="relative block aspect-[4/3] overflow-hidden rounded-[18px] bg-tile">
+              {c.image ? (
                 <img src={c.image} alt="" className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />
+              ) : (
+                <ProductImage product={{ category: c.id, brand: "", images: [] }} size="thumb" />
               )}
             </span>
             <span className="mt-2 block px-1 text-[0.95rem] font-[600]">{tr(c.name, lang)}</span>
@@ -240,7 +240,7 @@ function Spotlight() {
   return (
     <section aria-labelledby="spot" className="wrap mb-14 md:mb-20">
       <h2 id="spot" className="sr-only">
-        {t.home.gamingKicker}
+        {t.home.picks}
       </h2>
       <div className="spot-grid">
         {items.map((p, i) => (

@@ -68,7 +68,7 @@ export const parse = <T>(raw: string | null, fallback: T): T => {
   }
 };
 
-const IMAGE_KEY = /^(products|categories|banners|brand|demo)\/[\w.-]{1,120}$/;
+const IMAGE_KEY = /^(products|categories|banners|brand)\/[\w.-]{1,120}$/;
 const imageKey = (v: unknown): string | null => {
   if (v == null || v === "") return null;
   if (typeof v !== "string" || !IMAGE_KEY.test(v) || v.includes("..")) bad("Şəkil açarı yanlışdır");

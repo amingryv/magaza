@@ -37,7 +37,6 @@ export function ProductImage({
 
   if (failed) return <Placeholder category={product.category} brand={size === "thumb" ? "" : product.brand} label={alt} />;
   return (
-    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={src}
       alt={alt}
@@ -114,7 +113,60 @@ const parcel = (
     <path d="M7 14l17 9 17-9M24 23v20" />
   </>
 );
+const clothing = (
+  <>
+    <path d="M18 7 9 11.5l-4 9 6 3 2.5-4V41h21V19.5l2.5 4 6-3-4-9L30 7" />
+    <path d="M18 7c1.2 3 3.2 4.5 6 4.5S28.8 10 30 7" />
+  </>
+);
+const home = (
+  <>
+    <path d="M19 6h10M20 6c0 5-7 9-7 20 0 9 4.5 16 11 16s11-7 11-16c0-11-7-15-7-20" />
+    <path d="M15 24h18" />
+  </>
+);
+const bag = (
+  <>
+    <path d="M9 17h30l-2.5 25h-25z" />
+    <path d="M17 21v-7a7 7 0 0 1 14 0v7" />
+  </>
+);
+const beauty = (
+  <>
+    <rect x="14" y="18" width="20" height="24" rx="4" />
+    <path d="M19 18v-5h10v5M22 13V7h4v6" />
+  </>
+);
+const food = (
+  <>
+    <path d="M6 20h36l-4 20H10z" />
+    <path d="M15 20l6-12M33 20l-6-12M17 27v6M24 27v6M31 27v6" />
+  </>
+);
+/* Keys: category slugs, English and Azerbaijani (as the admin slugifies them). */
 const SHAPES: Record<string, React.ReactNode> = {
+  clothing,
+  clothes: clothing,
+  fashion: clothing,
+  geyim: clothing,
+  home,
+  "home-decor": home,
+  furniture: home,
+  ev: home,
+  "ev-ve-dekor": home,
+  mebel: home,
+  bags: bag,
+  aksesuarlar: bag,
+  cantalar: bag,
+  beauty,
+  cosmetics: beauty,
+  kosmetika: beauty,
+  food,
+  grocery: food,
+  qida: food,
+  erzaq: food,
+  electronics: phone,
+  elektronika: phone,
   phones: phone,
   phone,
   smartphones: phone,

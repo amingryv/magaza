@@ -94,17 +94,6 @@ export const IconTrash = ({ size = 18, className }: P) => (
     <path d="M5.5 7.5h13M9.5 7.5V5.8a1.3 1.3 0 0 1 1.3-1.3h2.4a1.3 1.3 0 0 1 1.3 1.3v1.7M7.2 7.5l.8 11a1.6 1.6 0 0 0 1.6 1.5h4.8a1.6 1.6 0 0 0 1.6-1.5l.8-11" />
   </svg>
 );
-export const IconSun = ({ size = 20, className }: P) => (
-  <svg {...base(size, className)} strokeWidth={1.9}>
-    <circle cx="12" cy="12" r="4" />
-    <path d="M12 3.5v1.8M12 18.7v1.8M3.5 12h1.8M18.7 12h1.8M6 6l1.3 1.3M16.7 16.7 18 18M6 18l1.3-1.3M16.7 7.3 18 6" />
-  </svg>
-);
-export const IconMoon = ({ size = 20, className }: P) => (
-  <svg {...base(size, className)} strokeWidth={1.9}>
-    <path d="M19 14.6A7.5 7.5 0 0 1 9.4 5a7.5 7.5 0 1 0 9.6 9.6z" />
-  </svg>
-);
 export const IconLock = ({ size = 15, className }: P) => (
   <svg {...base(size, className)} strokeWidth={2}>
     <rect x="5.5" y="10.5" width="13" height="9" rx="2.5" />
