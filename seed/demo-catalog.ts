@@ -1,4 +1,5 @@
 import type { Catalog } from "@/lib/catalog-types";
+import { appleCategories, appleProducts } from "./demo-apple.ts";
 
 /**
  * DEMO DATA. Synthetic prices and stock for the electronics demo.
@@ -7,15 +8,17 @@ import type { Catalog } from "@/lib/catalog-types";
  */
 export const demoCatalog: Catalog = {
   categories: [
-    { id: "phones", name: { az: "Telefonlar", ru: "Телефоны", en: "Phones" }, image: "/demo/iphone-15-pro.png" },
-    { id: "laptops", name: { az: "Noutbuklar", ru: "Ноутбуки", en: "Laptops" }, image: "/demo/macbook-pro.jpg" },
-    { id: "tablets", name: { az: "Planşetlər", ru: "Планшеты", en: "Tablets" }, image: "/demo/ipad-air.png" },
-    { id: "audio", name: { az: "Səs", ru: "Аудио", en: "Audio" }, image: "/demo/airpods-pro.jpg" },
-    { id: "watches", name: { az: "Smart saatlar", ru: "Смарт-часы", en: "Smartwatches" }, image: "/demo/apple-watch.jpg" },
+    { id: "phones", name: { az: "Telefonlar", ru: "Телефоны", en: "Phones" }, image: "/demo/iphone-17-pro-silver.jpg" },
+    { id: "laptops", name: { az: "Noutbuklar", ru: "Ноутбуки", en: "Laptops" }, image: "/demo/macbook-air-13.jpg" },
+    ...appleCategories,
+    { id: "tablets", name: { az: "Planşetlər", ru: "Планшеты", en: "Tablets" }, image: "/demo/ipad-pro-store.jpg" },
+    { id: "audio", name: { az: "Səs", ru: "Аудио", en: "Audio" }, image: "/demo/airpods-max.jpg" },
+    { id: "watches", name: { az: "Smart saatlar", ru: "Смарт-часы", en: "Smartwatches" }, image: "/demo/watch-ultra-3.jpg" },
     { id: "gaming", name: { az: "Oyun", ru: "Игры", en: "Gaming" }, image: "/demo/playstation-5.png" },
     { id: "accessories", name: { az: "Aksesuarlar", ru: "Аксессуары", en: "Accessories" }, image: "/demo/mx-master.jpg" },
   ],
   products: [
+    ...appleProducts,
     {
       id: "p1",
       slug: "iphone-15-pro",
@@ -67,7 +70,7 @@ export const demoCatalog: Catalog = {
         { name: { az: "Kamera", ru: "Камера", en: "Camera" }, value: { az: "48 + 12 + 12 MP" } },
         { name: { az: "Zəmanət", ru: "Гарантия", en: "Warranty" }, value: { az: "1 il", ru: "1 год", en: "1 year" } },
       ],
-      featured: true,
+      featured: false,
       addedAt: "2026-10-28",
     },
     {
@@ -107,7 +110,7 @@ export const demoCatalog: Catalog = {
         { name: { az: "Kamera", ru: "Камера", en: "Camera" }, value: { az: "200 MP" } },
         { name: { az: "Batareya", ru: "Батарея", en: "Battery" }, value: { az: "5000 mAh" } },
       ],
-      featured: true,
+      featured: false,
       addedAt: "2026-10-20",
     },
     {
@@ -212,7 +215,7 @@ export const demoCatalog: Catalog = {
         { name: { az: "İş vaxtı", ru: "Время работы", en: "Battery life" }, value: { az: "6 saat (qutu ilə 30)", ru: "6 ч (с кейсом 30)", en: "6 h (30 with case)" } },
         { name: { az: "Qoşulma", ru: "Подключение", en: "Connection" }, value: { az: "Bluetooth 5.3" } },
       ],
-      featured: true,
+      featured: false,
       addedAt: "2026-10-25",
     },
     {
@@ -304,7 +307,7 @@ export const demoCatalog: Catalog = {
         { name: { az: "Disk", ru: "Диск", en: "Storage" }, value: { az: "825 GB SSD" } },
         { name: { az: "Görüntü", ru: "Изображение", en: "Video" }, value: { az: "4K, 120 Hz-ə qədər", ru: "4K, до 120 Гц", en: "4K, up to 120 Hz" } },
       ],
-      featured: true,
+      featured: false,
       addedAt: "2026-10-30",
     },
     {

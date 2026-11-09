@@ -7,7 +7,7 @@ import type { ApiStore, FormField, Lang, Text } from "./api-types";
  * Nothing here is shop-specific.
  */
 /** Code version, shown in the admin panel; bump it with CHANGELOG.md. */
-export const APP_VERSION = "1.2.1";
+export const APP_VERSION = "1.3.0";
 
 /** Fonts bundled into the build (CSS family names). Only these reach the page's CSS. */
 export const FONTS: Record<string, string> = {

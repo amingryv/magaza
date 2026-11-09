@@ -4,6 +4,15 @@ Versiya nömrəsi admin panelin **Hesab** bölməsində görünür. Yeniləmək 
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar [SemVer](https://semver.org/).
 
+## [1.3.0] — 2026-11-09
+
+### Əlavə edildi
+- Demo mağazaya (yalnız lokal sınaq üçün, `npm run db:seed:local`) 33 yeni Apple məhsulu: iPhone 17 ailəsi, MacBook, iMac, Mac mini, iPad, AirPods, Apple Watch, aksesuarlar və Vision Pro — rəng və yaddaş variantları ilə, AZ/RU/EN mətnlərlə. Yeni “Masaüstü” kateqoriyası.
+- 51 yeni demo şəkil Wikimedia Commons-dan, açıq lisenziya ilə; müəlliflər “Şəkil müəllifləri” səhifəsində.
+
+### Qeyd
+- Mağazanın özünə (kod, baza, panel) heç bir dəyişiklik yoxdur — yalnız demo məlumat.
+
 ## [1.2.1] — 2026-11-09
 
 ### Dəyişdi
