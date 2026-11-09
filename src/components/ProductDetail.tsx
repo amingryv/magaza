@@ -143,6 +143,16 @@ export function ProductDetail({
             ))}
           </div>
           {product.images.length > 1 && (
+            <>
+              <button type="button" className="detail-arrow" data-side="prev" aria-label={t.nav.prevPhoto} disabled={slide <= 0} onClick={() => goTo(slide - 1)}>
+                <IconBack size={20} />
+              </button>
+              <button type="button" className="detail-arrow" data-side="next" aria-label={t.nav.nextPhoto} disabled={slide >= product.images.length - 1} onClick={() => goTo(slide + 1)}>
+                <IconBack size={20} className="-scale-x-100" />
+              </button>
+            </>
+          )}
+          {product.images.length > 1 && (
             <div className="detail-dots" aria-hidden>
               {product.images.map((src, i) => (
                 <i key={src} data-on={i === slide || undefined} />

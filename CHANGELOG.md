@@ -4,6 +4,12 @@ Versiya nömrəsi admin panelin **Hesab** bölməsində görünür. Yeniləmək 
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar [SemVer](https://semver.org/).
 
+## [2.1.0] — 2026-11-10
+
+### Əlavə olundu
+- Məhsulun şəkillərində sağda və solda ox düymələri: toxunanda növbəti / əvvəlki şəklə keçir (sürüşdürmək də əvvəlki kimi işləyir). İlk şəkildə “geri”, sonuncuda “irəli” oxu gizlənir.
+- Kartdan məhsul açılanda ünvan sətrində məhsulun öz linki görünür və brauzer sekmesində adı yazılır — linki kopyalayıb istənilən yerə göndərmək olar, açan şəxs birbaşa həmin məhsula düşür. Bağlananda ünvan əvvəlki səhifəyə qayıdır, kataloqdakı filtrlər yerində qalır.
+
 ## [2.0.0] — 2026-11-09
 
 Yeni görünüşün (1.4.0–1.6.0) son mərhələsi. Məlumatlar və ayarlar olduğu kimi qalır.

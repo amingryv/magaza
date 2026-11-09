@@ -9,6 +9,13 @@ import { ProductDetail } from "./ProductDetail";
 import { ProductImage } from "./ProductImage";
 import { IconBack } from "./Icons";
 
+/** History calls that skip Next.js: it wraps window.history.pushState/replaceState
+    to sync usePathname/useSearchParams, which would make the page under the detail
+    (e.g. the catalogue and its filters) react to the product's URL. */
+function rawHistory(kind: "pushState" | "replaceState", state: unknown, url?: string) {
+  History.prototype[kind].call(window.history, state, "", url);
+}
+
 /* ══ Quick view: the shared-element flight ════════════════
    (After Moxen "Maqueta".) Tap a card and its photo, title and price do not
    fade: they travel from the card to the detail and grow on the way, while
@@ -97,6 +104,7 @@ export function QuickViewProvider({ children }: { children: React.ReactNode }) {
   const [words, setWords] = useState({ name: "", price: "" });
 
   const from = useRef<FlyFrom | null>(null);
+  const pageTitle = useRef<string | null>(null);
   const pending = useRef(false);
   const layer = useRef<HTMLDivElement>(null);
   const tint = useRef<HTMLDivElement>(null);
@@ -252,6 +260,8 @@ export function QuickViewProvider({ children }: { children: React.ReactNode }) {
 
   function done() {
     phase.current = "closed";
+    if (pageTitle.current !== null) document.title = pageTitle.current;
+    pageTitle.current = null;
     timers.current.forEach(clearTimeout);
     timers.current = [];
     cancelAnimationFrame(raf.current);
@@ -274,8 +284,15 @@ export function QuickViewProvider({ children }: { children: React.ReactNode }) {
     entered.current = false;
     setWords({ name: f?.name.textContent ?? "", price: f?.price.textContent ?? "" });
     setProduct(p);
+    // The address bar shows the product's own link while the detail is open, so it can be
+    // copied and shared. qvFrom remembers the page underneath for leave() and forward.
     try {
-      window.history.pushState({ ...(window.history.state ?? {}), qv: p.slug }, "");
+      const lang = window.location.pathname.split("/")[1];
+      const back = window.location.pathname + window.location.search + window.location.hash;
+      rawHistory("pushState", { ...(window.history.state ?? {}), qv: p.slug, qvFrom: back }, `/${lang}/p/?s=${encodeURIComponent(p.slug)}`);
+      pageTitle.current = document.title;
+      const name = f?.name.textContent?.trim();
+      if (name) document.title = `${name} — ${document.title.split(" — ").pop()}`;
     } catch {}
   }
 
@@ -315,7 +332,8 @@ export function QuickViewProvider({ children }: { children: React.ReactNode }) {
       try {
         const rest = { ...s };
         delete rest.qv;
-        window.history.replaceState(rest, "");
+        delete rest.qvFrom;
+        rawHistory("replaceState", rest, s.qvFrom);
       } catch {}
     }
     P.current.x = P.current.to = 0;
@@ -366,6 +384,15 @@ export function QuickViewProvider({ children }: { children: React.ReactNode }) {
       if (phase.current === "open" || phase.current === "opening") {
         e.stopImmediatePropagation();
         api.current.animateClose();
+      } else if (e.state?.qv) {
+        // "forward" back into a closed detail: stay on the page underneath, with its address
+        e.stopImmediatePropagation();
+        const rest = { ...e.state };
+        delete rest.qv;
+        delete rest.qvFrom;
+        try {
+          rawHistory("replaceState", rest, e.state.qvFrom);
+        } catch {}
       }
     };
     const onKey = (e: KeyboardEvent) => {

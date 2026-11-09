@@ -48,7 +48,7 @@ From 1024px the filters live in a sidebar (`.catalog-split`); below that they op
 
 ## Product page
 
-Gallery on the left (sticky on desktop) with thumbnails under it. Options are bordered pills (`.seg`), colours are swatches. When the add button scrolls away, a thin buy bar (`.buybar`) shows the product, the chosen variant, the price and the button. Description and the specs table run full width below, side by side on desktop.
+Gallery on the left (sticky on desktop) with thumbnails under it. With more than one photo, white round arrows (`.detail-arrow`) sit on its sides, hidden at the ends and during the flight. The quick view puts the product's own link (`/<lang>/p/?s=<slug>`) and name into the address bar and tab title so it can be shared. It uses `History.prototype.pushState` because Next.js's patched `history.pushState` would make the page underneath react to the new URL. Closing goes back to the old address. Options are bordered pills (`.seg`), colours are swatches. When the add button scrolls away, a thin buy bar (`.buybar`) shows the product, the chosen variant, the price and the button. Description and the specs table run full width below, side by side on desktop.
 
 ## Cart, order, sent
 

@@ -737,6 +737,59 @@ input[type="search"]::-webkit-search-cancel-button {
     flex: 0 0 100%;
     scroll-snap-align: center;
   }
+  /* prev / next photo: white circles on the picture's sides */
+  .detail-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-top: -1.25rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.88);
+    color: var(--ink);
+    outline: 1px solid rgb(10 10 10 / 0.06);
+    outline-offset: -1px;
+    transition:
+      opacity 0.25s,
+      transform 0.2s var(--spring);
+  }
+  .detail-arrow[data-side="prev"] {
+    left: 12px;
+  }
+  .detail-arrow[data-side="next"] {
+    right: 12px;
+  }
+  .detail-arrow:active {
+    transform: scale(0.9);
+  }
+  .detail-arrow:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+  [data-flying] .detail-arrow {
+    opacity: 0;
+  }
+  @media (hover: hover) {
+    .detail-arrow:hover {
+      background: #fff;
+    }
+  }
+  @media (min-width: 768px) {
+    .detail-arrow {
+      width: 2.75rem;
+      height: 2.75rem;
+      margin-top: -1.375rem;
+    }
+    .detail-arrow[data-side="prev"] {
+      left: 16px;
+    }
+    .detail-arrow[data-side="next"] {
+      right: 16px;
+    }
+  }
   .detail-dots {
     position: absolute;
     left: 50%;
