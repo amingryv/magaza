@@ -4,6 +4,11 @@ Versiya nömrəsi admin panelin **Hesab** bölməsində görünür. Yeniləmək 
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar [SemVer](https://semver.org/).
 
+## [1.2.1] — 2026-11-09
+
+### Dəyişdi
+- Mağazaya aid olmayan köməkçi fayllar repodan silindi.
+
 ## [1.2.0] — 2026-11-09
 
 ### Əlavə edildi
