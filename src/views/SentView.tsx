@@ -29,7 +29,7 @@ export function SentView() {
 
   return (
     <section className="relative overflow-hidden">
-      <div className="wrap relative grid min-h-[70dvh] place-items-center py-14">
+      <div className="wrap relative grid place-items-center pb-10 pt-14 md:pb-14 md:pt-20">
         <div className="w-full max-w-xl text-center">
           <span style={{ background: viaWa ? "var(--wa)" : "var(--ink)", color: "var(--paper)" }} className="relative mx-auto grid size-20 place-items-center rounded-full text-white [animation:pop_.6s_var(--spring)_both]">
             <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -47,11 +47,6 @@ export function SentView() {
             </p>
           )}
           <p className="mx-auto mt-5 max-w-md text-[1.05rem] text-ink-soft [animation:rise_.7s_.32s_var(--curve)_both]">{viaWa ? t.sent.leadWa : t.sent.leadSite}</p>
-          {order && (
-            <p className="num mt-2 font-semibold text-ink-soft">
-              {t.cart.total}: <span className="text-ink">{formatPrice(order.total)}</span>
-            </p>
-          )}
           <div className="mt-8 flex flex-col gap-3 [animation:rise_.7s_.4s_var(--curve)_both] sm:flex-row sm:justify-center">
             {order && viaWa && (
               <a href={whatsappLink(whatsappText(order), store.whatsapp)} target="_blank" rel="noopener" className="pill pill-wa">
@@ -63,6 +58,43 @@ export function SentView() {
               {t.sent.home}
             </Link>
           </div>
+        </div>
+      </div>
+
+      <div className="wrap grid gap-4 pb-16 md:grid-cols-2 md:gap-5 [animation:rise_.7s_.5s_var(--curve)_both]">
+        {order && (
+          <div className="rounded-[24px] bg-paper-2 p-5 md:p-7">
+            <h2 className="text-[1.2rem] font-[650] tracking-[-0.025em]">{t.order.summary}</h2>
+            <ul className="mt-4 divide-y divide-ink-line border-y border-ink-line">
+              {order.lines.map((l) => (
+                <li key={`${l.productId}-${l.variantId}`} className="flex items-baseline justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold tracking-[-0.02em]">{l.name}</p>
+                    <p className="num truncate text-[0.8rem] text-ink-soft">
+                      {l.variantLabel ? `${l.variantLabel} · ` : ""}
+                      {l.qty} × {formatPrice(l.price)}
+                    </p>
+                  </div>
+                  <span className="num shrink-0 font-semibold">{formatPrice(l.qty * l.price)}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="num mt-4 flex items-baseline justify-between text-[1.1rem] font-bold">
+              <span>{t.cart.total}</span>
+              <span>{formatPrice(order.total)}</span>
+            </p>
+          </div>
+        )}
+        <div className={`rounded-[24px] bg-paper-2 p-5 md:p-7 ${order ? "" : "md:col-span-2 md:mx-auto md:w-full md:max-w-xl"}`}>
+          <h2 className="text-[1.2rem] font-[650] tracking-[-0.025em]">{t.sent.nextTitle}</h2>
+          <ol className="mt-4 grid gap-4">
+            {t.sent.next.map((step, i) => (
+              <li key={step} className="flex items-center gap-3.5">
+                <span className="num grid size-8 shrink-0 place-items-center rounded-full bg-paper text-[0.85rem] font-semibold">{i + 1}</span>
+                <span className="text-[0.98rem]">{step}</span>
+              </li>
+            ))}
+          </ol>
         </div>
       </div>
     </section>

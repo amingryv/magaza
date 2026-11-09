@@ -4,6 +4,15 @@ Versiya nömrəsi admin panelin **Hesab** bölməsində görünür. Yeniləmək 
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar [SemVer](https://semver.org/).
 
+## [1.6.0] — 2026-11-09
+
+### Dəyişdi (görünüş)
+- Səbət səhifəsi: kompüterdə iki sütun — solda böyük şəkilli məhsul sətirləri, sağda sürüşərkən yerində qalan yekun paneli (cəm, çatdırılma qeydi, “Sifariş et”, “Alış-verişə davam et”).
+- Sifariş forması: bir səhifədə nömrələnmiş addımlar — 1. Əlaqə, 2. Çatdırılma (ünvan/qeyd açıqdırsa), 3. Təsdiq. Telefonda sifarişin xülasəsi formanın üstündə bir sətirə yığılır və toxunanda açılır; kompüterdə sağda “Səbətə düzəliş et” linki var.
+- Sifariş göndərildi səhifəsi: altında sifarişin tərkibi və cəmi, yanında “Bundan sonra” — üç addım.
+- Əlaqə səhifəsi: başlıq ortada, düymələr (WhatsApp, Instagram, TikTok, Facebook) altında; ünvan kartı xəritəni, telefon kartı zəngi açır, e-poçt da göstərilir.
+- Statik səhifələr (Haqqımızda, Çatdırılma və s.): başlıq ortada, oxunaqlı geniş mətn, sonda “Sualınız var?” — WhatsApp düyməsi.
+
 ## [1.5.0] — 2026-11-09
 
 ### Dəyişdi (görünüş)

@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { useSite } from "@/lib/site";
 import { usePage } from "@/lib/api";
 import { Markdown } from "@/components/Markdown";
+import { WhatsAppIcon } from "@/components/BrandIcons";
+import { whatsappLink } from "@/lib/order";
 
 export function PageView() {
   const { t, lang, ctx, href, store, ready } = useSite();
@@ -35,11 +37,25 @@ export function PageView() {
     );
 
   return (
-    <article className="wrap pb-14 pt-6 md:pt-12">
-      <h1 className="page-title">{title}</h1>
-      <div className="prose-shop mt-6 max-w-[42rem]">
+    <article className="wrap pb-16 pt-10 md:pt-20">
+      <header className="mx-auto max-w-[44rem] border-b border-ink-line pb-8 text-center md:pb-12">
+        <h1 className="page-title">{title}</h1>
+      </header>
+      <div className="prose-shop mx-auto mt-8 max-w-[40rem] [animation:rise_.6s_var(--curve)] md:mt-12">
         <Markdown text={content} />
       </div>
+      {store.whatsapp && (
+        <aside className="mx-auto mt-14 flex max-w-[40rem] flex-col items-start gap-4 rounded-[24px] bg-paper-2 p-6 sm:flex-row sm:items-center sm:justify-between md:mt-20">
+          <div>
+            <p className="text-[1.15rem] font-[650] tracking-[-0.025em]">{t.about.ask}</p>
+            <p className="mt-0.5 text-[0.9rem] text-ink-soft">{t.about.askLead}</p>
+          </div>
+          <a href={whatsappLink("", store.whatsapp)} target="_blank" rel="noopener" className="pill pill-wa shrink-0">
+            <WhatsAppIcon size={19} />
+            {t.home.writeUs}
+          </a>
+        </aside>
+      )}
     </article>
   );
 }

@@ -101,7 +101,7 @@ export function CartDrawer() {
 
 /** Shared by the sheet and the /cart page. */
 export function CartLines({ compact = false, onNavigate }: { compact?: boolean; onNavigate?: () => void }) {
-  const { t, lang, href } = useSite();
+  const { t, lang, href, store } = useSite();
   const { lines, setQty, remove, clear, restore, ready } = useCart();
   const { map: products, loading } = useProductsById(lines.map((l) => l.productId));
   const rows = resolveLines(lines, products, lang);
@@ -139,76 +139,108 @@ export function CartLines({ compact = false, onNavigate }: { compact?: boolean; 
       </div>
     );
 
+  const total = rows.reduce((s, r) => s + r.price * r.qty, 0);
+  const thumb = compact ? "!w-[4.6rem]" : "!w-[5.5rem] md:!w-28";
+
+  const list = (
+    <motion.ul layoutScroll className={compact ? "mt-2" : "divide-y divide-ink-line border-b border-ink-line"}>
+      <AnimatePresence initial={false}>
+        {rows.map((r) => {
+          const p = products.get(r.productId)!;
+          const v = p.variants.find((x) => x.id === r.variantId)!;
+          return (
+            <motion.li
+              key={`${r.productId}-${r.variantId}`}
+              layout
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, x: -40, height: 0, marginTop: 0, paddingTop: 0, paddingBottom: 0 }}
+              transition={{ type: "spring", stiffness: 420, damping: 36 }}
+              className={`flex overflow-hidden ${compact ? "gap-3.5 py-3.5" : "gap-4 py-5 md:gap-6 md:py-6"}`}
+            >
+              <Link href={href(`/p/?s=${p.slug}`)} onClick={onNavigate} className={`frame frame-thumb shrink-0 ${thumb}`}>
+                <ProductImage product={p} size="thumb" />
+              </Link>
+              <div className="flex min-w-0 flex-1 flex-col">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <Link href={href(`/p/?s=${p.slug}`)} onClick={onNavigate} className={`block truncate font-semibold tracking-[-0.02em] ${compact ? "" : "md:text-[1.15rem]"}`}>
+                      {r.name}
+                    </Link>
+                    <p className="truncate text-[0.8rem] text-ink-soft md:text-[0.85rem]">{r.variantLabel || p.brand}</p>
+                    {!compact && r.qty > 1 && <p className="num mt-0.5 text-[0.8rem] text-ink-soft">{formatPrice(r.price)} / {t.cart.each}</p>}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => remove(r.productId, r.variantId)}
+                    className="-mr-1.5 -mt-1 grid size-9 shrink-0 place-items-center rounded-full text-ink-soft transition-colors hover:text-danger active:scale-90"
+                    aria-label={`${t.cart.remove}: ${r.name}`}
+                  >
+                    <IconTrash size={17} />
+                  </button>
+                </div>
+                <div className="mt-auto flex items-center justify-between gap-2 pt-1.5">
+                  <Counter
+                    value={r.qty}
+                    onChange={(n) => setQty(r.productId, r.variantId, n)}
+                    min={1}
+                    max={Math.max(1, Math.min(20, v.stock))}
+                    cell={compact ? 28 : 32}
+                    label={`${t.product.quantity}: ${tr(p.name, lang)}`}
+                    lessLabel={t.product.less}
+                    moreLabel={t.product.more}
+                  />
+                  <span className={`num font-bold tracking-[-0.02em] ${compact ? "" : "md:text-[1.15rem]"}`}>{formatPrice(r.price * r.qty)}</span>
+                </div>
+              </div>
+            </motion.li>
+          );
+        })}
+      </AnimatePresence>
+    </motion.ul>
+  );
+
+  const checkout = (
+    <Link
+      href={href("/order/")}
+      onClick={onNavigate}
+      aria-disabled={rows.length === 0}
+      className={`pill pill-ink w-full ${compact ? "mt-3" : "mt-5 h-14 text-[1.02rem]"} ${rows.length === 0 ? "pointer-events-none opacity-40" : ""}`}
+    >
+      {t.cart.checkout}
+      {rows.length > 0 && <span className="num opacity-80">· {formatPrice(total)}</span>}
+    </Link>
+  );
+
+  if (!compact)
+    return (
+      <div className="grid gap-8 md:grid-cols-12 md:gap-10">
+        <div className="md:col-span-7">{list}</div>
+        <aside className="md:col-span-5">
+          <div className="rounded-[24px] bg-paper-2 p-5 md:sticky md:top-24 md:p-6">
+            <CartMeter rows={rows} ghost={ghost?.rows ?? null} onClear={doClear} onUndo={undo} />
+            {tr(store.orders.deliveryNote, lang) && <p className="mt-5 border-t border-ink-line pt-4 text-[0.85rem] text-ink-soft">{tr(store.orders.deliveryNote, lang)}</p>}
+            {checkout}
+            <p className="mt-3 text-center text-[0.8rem] text-ink-soft">{t.cart.note}</p>
+            <Link href={href("/catalog/")} className="mt-1 block text-center text-[0.85rem] font-medium underline-offset-4 hover:underline">
+              {t.cart.continue}
+            </Link>
+          </div>
+        </aside>
+      </div>
+    );
+
   return (
     <>
-      <div className={`overflow-y-auto overscroll-contain ${compact ? "flex-1 px-5" : ""}`}>
+      <div className="flex-1 overflow-y-auto overscroll-contain px-5">
         <div className="rounded-[20px] bg-paper-2 p-4">
           <CartMeter rows={rows} ghost={ghost?.rows ?? null} onClear={doClear} onUndo={undo} />
         </div>
-        <motion.ul layoutScroll className="mt-2">
-          <AnimatePresence initial={false}>
-            {rows.map((r) => {
-              const p = products.get(r.productId)!;
-              const v = p.variants.find((x) => x.id === r.variantId)!;
-              return (
-                <motion.li
-                  key={`${r.productId}-${r.variantId}`}
-                  layout
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: -40, height: 0, marginTop: 0, paddingTop: 0, paddingBottom: 0 }}
-                  transition={{ type: "spring", stiffness: 420, damping: 36 }}
-                  className="flex gap-3.5 overflow-hidden py-3.5"
-                >
-                  <Link href={href(`/p/?s=${p.slug}`)} onClick={onNavigate} className="frame frame-thumb !w-[4.6rem] shrink-0">
-                    <ProductImage product={p} size="thumb" />
-                  </Link>
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold tracking-[-0.02em]">{r.name}</p>
-                        <p className="truncate text-[0.8rem] text-ink-soft">{r.variantLabel || p.brand}</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => remove(r.productId, r.variantId)}
-                        className="-mr-1.5 -mt-1 grid size-9 shrink-0 place-items-center rounded-full text-ink-soft transition-colors hover:text-danger active:scale-90"
-                        aria-label={`${t.cart.remove}: ${r.name}`}
-                      >
-                        <IconTrash size={17} />
-                      </button>
-                    </div>
-                    <div className="mt-auto flex items-center justify-between gap-2 pt-1.5">
-                      <Counter
-                        value={r.qty}
-                        onChange={(n) => setQty(r.productId, r.variantId, n)}
-                        min={1}
-                        max={Math.max(1, Math.min(20, v.stock))}
-                        cell={28}
-                        label={`${t.product.quantity}: ${tr(p.name, lang)}`}
-                        lessLabel={t.product.less}
-                        moreLabel={t.product.more}
-                      />
-                      <span className="num font-bold tracking-[-0.02em]">{formatPrice(r.price * r.qty)}</span>
-                    </div>
-                  </div>
-                </motion.li>
-              );
-            })}
-          </AnimatePresence>
-        </motion.ul>
+        {list}
       </div>
-      <div className={compact ? "safe-bottom border-t border-ink-line px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4" : "pt-4"}>
+      <div className="safe-bottom border-t border-ink-line px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
         <p className="text-[0.8rem] text-ink-soft">{t.cart.note}</p>
-        <Link
-          href={href("/order/")}
-          onClick={onNavigate}
-          aria-disabled={rows.length === 0}
-          className={`pill pill-ink mt-3 w-full ${rows.length === 0 ? "pointer-events-none opacity-40" : ""}`}
-        >
-          {t.cart.checkout}
-          {rows.length > 0 && <span className="num opacity-80">· {formatPrice(rows.reduce((s, r) => s + r.price * r.qty, 0))}</span>}
-        </Link>
+        {checkout}
       </div>
     </>
   );

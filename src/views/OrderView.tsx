@@ -150,129 +150,8 @@ export function OrderView() {
     );
 
   const label = "mb-2 block text-[0.88rem] font-semibold";
-
-  return (
-    <div className="wrap pb-10 pt-6 md:pt-12">
-      <h1 className="page-title">{t.order.title}</h1>
-      <p className="mt-2 max-w-[36rem] text-ink-soft md:text-lg">{t.order.lead}</p>
-
-      <div className="mt-8 grid gap-10 md:grid-cols-12">
-        <form onSubmit={submit} noValidate className="grid content-start gap-6 md:col-span-6 [&>*]:[animation:rise_.6s_var(--curve)_both] [&>*:nth-child(2)]:[animation-delay:.06s] [&>*:nth-child(3)]:[animation-delay:.12s] [&>*:nth-child(4)]:[animation-delay:.18s]">
-          <div>
-            <label htmlFor="name" className={label}>
-              {t.order.name}
-            </label>
-            <input
-              id="name"
-              ref={nameRef}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoComplete="name"
-              placeholder={t.order.namePh}
-              aria-invalid={nameErr}
-              aria-describedby={nameErr ? "name-err" : undefined}
-              className="field"
-            />
-            {nameErr && (
-              <p id="name-err" className="mt-2 text-sm font-semibold text-danger [animation:rise_.3s_var(--curve)]">
-                {t.order.errName}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="phone" className={label}>
-              {t.order.phone}
-            </label>
-            <div className="relative">
-              <span className="num pointer-events-none absolute left-2 top-1/2 grid h-10 -translate-y-1/2 place-items-center rounded-[10px] bg-paper-2 px-3 text-[0.95rem] font-semibold text-ink">+994</span>
-              <input
-                id="phone"
-                ref={phoneRef}
-                value={prettyPhone(cleanPhone(phone))}
-                onChange={(e) => setPhone(cleanPhone(e.target.value))}
-                inputMode="tel"
-                autoComplete="tel-national"
-                placeholder={t.order.phonePh}
-                aria-invalid={phoneErr}
-                aria-describedby={phoneErr ? "phone-err" : undefined}
-                className="field num !pl-[5.4rem]"
-              />
-            </div>
-            {phoneErr && (
-              <p id="phone-err" className="mt-2 text-sm font-semibold text-danger [animation:rise_.3s_var(--curve)]">
-                {t.order.errPhone}
-              </p>
-            )}
-          </div>
-
-          {addr.visible && (
-            <div>
-              <label htmlFor="address" className={label}>
-                {t.order.address} {!addr.required && <span className="font-normal text-ink-soft">· {t.order.optional}</span>}
-              </label>
-              <input
-                id="address"
-                ref={addressRef}
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                autoComplete="street-address"
-                placeholder={t.order.addressPh}
-                aria-invalid={addressErr}
-                className="field"
-              />
-              {addressErr && <p className="mt-2 text-sm font-semibold text-danger">{t.order.errRequired}</p>}
-            </div>
-          )}
-
-          {noteField.visible && (
-            <div>
-              <label htmlFor="note" className={label}>
-                {t.order.note} {!noteField.required && <span className="font-normal text-ink-soft">· {t.order.optional}</span>}
-              </label>
-              <textarea id="note" ref={noteRef} value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder={t.order.notePh} aria-invalid={noteErr} className="field resize-y" />
-              {noteErr && <p className="mt-2 text-sm font-semibold text-danger">{t.order.errRequired}</p>}
-            </div>
-          )}
-
-          {/* honeypot: hidden from people and screen readers; bots fill it */}
-          <input ref={honeypot} name="website" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
-
-          <div className="grid gap-2.5">
-            {belowMin && <p className="text-center text-sm font-semibold text-danger">{t.order.errMin(formatPrice(store.orders.minAmount))}</p>}
-            {tr(store.orders.deliveryNote, lang) && <p className="text-center text-[0.85rem] text-ink-soft">{tr(store.orders.deliveryNote, lang)}</p>}
-            <button type="submit" disabled={sending || rows.length === 0 || belowMin} className="pill pill-ink relative h-14 w-full text-[1.02rem]">
-              {sending ? t.order.sending : t.order.sendSite}
-              <span className="sparks" ref={sparkSite} aria-hidden />
-            </button>
-            {failure && (
-              <p role="alert" className="text-center text-sm font-semibold text-danger [animation:rise_.3s_var(--curve)]">
-                {failure}
-              </p>
-            )}
-            <p className="text-center text-[0.8rem] text-ink-soft">{t.order.siteHint}</p>
-            <p className="mt-1 flex items-center justify-center gap-2 text-[0.8rem] font-medium text-ink-soft">
-              <IconLock />
-              {t.order.privacy}
-            </p>
-          </div>
-        </form>
-
-        <aside className="md:col-span-5 md:col-start-8 [animation:rise_.7s_.1s_var(--curve)_both]">
-          <div className="rounded-[24px] bg-paper-2 p-5 md:sticky md:top-24">
-            <CartMeter
-              rows={rows}
-              ghost={ghost?.rows ?? null}
-              onClear={() => {
-                setGhost({ lines, rows });
-                clear();
-              }}
-              onUndo={() => {
-                if (ghost) restore(ghost.lines);
-                setGhost(null);
-              }}
-            />
-            <ul className="mt-5 divide-y divide-ink-line border-t border-ink-line">
+  const summaryList = (
+            <ul className="divide-y divide-ink-line">
               {rows.map((r) => {
                 const p = products.get(r.productId);
                 return (
@@ -290,10 +169,173 @@ export function OrderView() {
                 );
               })}
             </ul>
+  );
+
+  return (
+    <div className="wrap pb-10 pt-6 md:pt-12">
+      <h1 className="page-title">{t.order.title}</h1>
+      <p className="mt-2 max-w-[36rem] text-ink-soft md:text-lg">{t.order.lead}</p>
+
+      {/* phone: the order folds into one line above the form */}
+      <details className="group mt-6 rounded-[20px] bg-paper-2 md:hidden">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 font-semibold [&::-webkit-details-marker]:hidden">
+          <span>
+            {t.order.showSummary} <span className="font-normal text-ink-soft">· {t.cart.items(rows.reduce((s, r) => s + r.qty, 0))}</span>
+          </span>
+          <span className="num flex items-center gap-2">
+            {formatPrice(total)}
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="transition-transform group-open:rotate-180">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </span>
+        </summary>
+        <div className="px-4 pb-3">{summaryList}</div>
+      </details>
+
+      <div className="mt-8 grid gap-10 md:mt-10 md:grid-cols-12">
+        <form onSubmit={submit} noValidate className="grid content-start gap-10 md:col-span-7 [&>*]:[animation:rise_.6s_var(--curve)_both] [&>*:nth-child(2)]:[animation-delay:.08s] [&>*:nth-child(3)]:[animation-delay:.16s]">
+          <Step n={1} title={t.order.stepContact}>
+            <div>
+              <label htmlFor="name" className={label}>
+                {t.order.name}
+              </label>
+              <input
+                id="name"
+                ref={nameRef}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                autoComplete="name"
+                placeholder={t.order.namePh}
+                aria-invalid={nameErr}
+                aria-describedby={nameErr ? "name-err" : undefined}
+                className="field"
+              />
+              {nameErr && (
+                <p id="name-err" className="mt-2 text-sm font-semibold text-danger [animation:rise_.3s_var(--curve)]">
+                  {t.order.errName}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="phone" className={label}>
+                {t.order.phone}
+              </label>
+              <div className="relative">
+                <span className="num pointer-events-none absolute left-2 top-1/2 grid h-10 -translate-y-1/2 place-items-center rounded-[10px] bg-paper-2 px-3 text-[0.95rem] font-semibold text-ink">+994</span>
+                <input
+                  id="phone"
+                  ref={phoneRef}
+                  value={prettyPhone(cleanPhone(phone))}
+                  onChange={(e) => setPhone(cleanPhone(e.target.value))}
+                  inputMode="tel"
+                  autoComplete="tel-national"
+                  placeholder={t.order.phonePh}
+                  aria-invalid={phoneErr}
+                  aria-describedby={phoneErr ? "phone-err" : undefined}
+                  className="field num !pl-[5.4rem]"
+                />
+              </div>
+              {phoneErr && (
+                <p id="phone-err" className="mt-2 text-sm font-semibold text-danger [animation:rise_.3s_var(--curve)]">
+                  {t.order.errPhone}
+                </p>
+              )}
+            </div>
+          </Step>
+
+          {(addr.visible || noteField.visible) && (
+            <Step n={2} title={t.order.stepDelivery}>
+              {addr.visible && (
+                <div>
+                  <label htmlFor="address" className={label}>
+                    {t.order.address} {!addr.required && <span className="font-normal text-ink-soft">· {t.order.optional}</span>}
+                  </label>
+                  <input
+                    id="address"
+                    ref={addressRef}
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    autoComplete="street-address"
+                    placeholder={t.order.addressPh}
+                    aria-invalid={addressErr}
+                    className="field"
+                  />
+                  {addressErr && <p className="mt-2 text-sm font-semibold text-danger">{t.order.errRequired}</p>}
+                </div>
+              )}
+
+              {noteField.visible && (
+                <div>
+                  <label htmlFor="note" className={label}>
+                    {t.order.note} {!noteField.required && <span className="font-normal text-ink-soft">· {t.order.optional}</span>}
+                  </label>
+                  <textarea id="note" ref={noteRef} value={note} onChange={(e) => setNote(e.target.value)} rows={3} placeholder={t.order.notePh} aria-invalid={noteErr} className="field resize-y" />
+                  {noteErr && <p className="mt-2 text-sm font-semibold text-danger">{t.order.errRequired}</p>}
+                </div>
+              )}
+            </Step>
+          )}
+
+          <Step n={addr.visible || noteField.visible ? 3 : 2} title={t.order.stepSend}>
+            <div className="grid gap-2.5">
+              {belowMin && <p className="text-center text-sm font-semibold text-danger">{t.order.errMin(formatPrice(store.orders.minAmount))}</p>}
+              {tr(store.orders.deliveryNote, lang) && <p className="text-center text-[0.85rem] text-ink-soft">{tr(store.orders.deliveryNote, lang)}</p>}
+              <button type="submit" disabled={sending || rows.length === 0 || belowMin} className="pill pill-ink relative h-14 w-full text-[1.02rem]">
+                {sending ? t.order.sending : t.order.sendSite}
+                <span className="sparks" ref={sparkSite} aria-hidden />
+              </button>
+              {failure && (
+                <p role="alert" className="text-center text-sm font-semibold text-danger [animation:rise_.3s_var(--curve)]">
+                  {failure}
+                </p>
+              )}
+              <p className="text-center text-[0.8rem] text-ink-soft">{t.order.siteHint}</p>
+              <p className="mt-1 flex items-center justify-center gap-2 text-[0.8rem] font-medium text-ink-soft">
+                <IconLock />
+                {t.order.privacy}
+              </p>
+            </div>
+          </Step>
+
+          {/* honeypot: hidden from people and screen readers; bots fill it */}
+          <input ref={honeypot} name="website" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
+        </form>
+
+        <aside className="hidden md:col-span-5 md:block [animation:rise_.7s_.1s_var(--curve)_both]">
+          <div className="rounded-[24px] bg-paper-2 p-5 md:sticky md:top-24">
+            <CartMeter
+              rows={rows}
+              ghost={ghost?.rows ?? null}
+              onClear={() => {
+                setGhost({ lines, rows });
+                clear();
+              }}
+              onUndo={() => {
+                if (ghost) restore(ghost.lines);
+                setGhost(null);
+              }}
+            />
+            <div className="mt-5 border-t border-ink-line">{summaryList}</div>
+            <Link href={href("/cart/")} className="mt-3 inline-block text-[0.85rem] font-medium underline-offset-4 hover:underline">
+              {t.order.editCart}
+            </Link>
             <p className="mt-2 text-[0.8rem] text-ink-soft">{t.cart.note}</p>
           </div>
         </aside>
       </div>
     </div>
+  );
+}
+
+function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
+  return (
+    <section className="grid gap-5">
+      <h2 className="flex items-center gap-3 text-[1.3rem] font-[650] tracking-[-0.025em] md:text-[1.5rem]">
+        <span className="num grid size-8 shrink-0 place-items-center rounded-full bg-ink text-[0.85rem] font-semibold text-paper">{n}</span>
+        {title}
+      </h2>
+      {children}
+    </section>
   );
 }
