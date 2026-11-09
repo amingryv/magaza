@@ -1,6 +1,7 @@
 import type { Bootstrap, Lang, Translations } from "../src/shared/api-types";
 import { FONTS, pickText, publicStore } from "../src/shared/settings";
-import { loadBootstrap } from "./catalog";
+import { EFFECTIVE, imageUrl, loadBootstrap } from "./catalog";
+import { canonicalPath, langUrl } from "./seo";
 
 /**
  * The built HTML holds no shop data. On the way out, the Worker writes the
@@ -27,9 +28,29 @@ function clip(s: string, n = 160): string {
   return flat.length > n ? `${flat.slice(0, n - 1).trimEnd()}…` : flat;
 }
 
-type Meta = { title: string; description: string; image: string | null };
+type Meta = { title: string; description: string; image: string | null; ld?: Record<string, unknown> };
 
-async function pageMeta(env: Env, url: URL, lang: Lang, boot: Bootstrap): Promise<Meta> {
+type ProductRow = {
+  name: string;
+  description: string | null;
+  images: string | null;
+  translations: string | null;
+  sku: string | null;
+  attributes: string | null;
+  eff_price: number;
+  max_price: number;
+  in_stock: number;
+};
+
+function parse<T>(s: string | null, fallback: T): T {
+  try {
+    return s ? (JSON.parse(s) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+async function pageMeta(env: Env, url: URL, lang: Lang, boot: Bootstrap, pageUrl: string): Promise<Meta> {
   const s = boot.store;
   const main = s.language;
   const tagline = pickText(s.description, lang, main);
@@ -48,17 +69,40 @@ async function pageMeta(env: Env, url: URL, lang: Lang, boot: Bootstrap): Promis
   });
 
   if (section === "p" && slug) {
-    const p = await env.DB.prepare("SELECT name, description, images, translations FROM products WHERE slug = ? AND is_active = 1")
+    const p = await env.DB.prepare(
+      `SELECT p.name, p.description, p.images, p.translations, p.sku, p.attributes, ${EFFECTIVE},
+         COALESCE((SELECT MAX(COALESCE(v.price, p.price)) FROM product_variants v WHERE v.product_id = p.id), p.price) AS max_price
+       FROM products p WHERE p.slug = ? AND p.is_active = 1`,
+    )
       .bind(slug)
-      .first<{ name: string; description: string | null; images: string | null; translations: string | null }>();
+      .first<ProductRow>();
     if (!p) return home;
-    const tr = p.translations ? (JSON.parse(p.translations) as Translations) : null;
-    let image: string | null = null;
-    try {
-      const keys = JSON.parse(p.images ?? "[]") as string[];
-      if (keys[0]) image = keys[0].startsWith("/") || /^https?:/.test(keys[0]) ? keys[0] : `/images/${keys[0]}`;
-    } catch {}
-    return titled(tx(p.name, tr, "name", lang, main), clip(tx(p.description ?? "", tr, "description", lang, main)), image);
+    const tr = parse<Translations | null>(p.translations, null);
+    const images = parse<unknown[]>(p.images, [])
+      .filter((k): k is string => typeof k === "string" && k !== "")
+      .map(imageUrl);
+    const name = tx(p.name, tr, "name", lang, main);
+    const description = clip(tx(p.description ?? "", tr, "description", lang, main), 300);
+    const brand = parse<Record<string, unknown>>(p.attributes, {}).brand;
+    const money = (n: number) => (n / 100).toFixed(2);
+    const availability = `https://schema.org/${p.in_stock ? "InStock" : "OutOfStock"}`;
+    const priceCurrency = s.currency.code;
+    // Google shows the price and stock state in search results from this
+    const ld: Record<string, unknown> = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name,
+      url: pageUrl,
+      ...(description && { description }),
+      ...(images.length && { image: images.slice(0, 5).map((i) => new URL(i, url.origin).toString()) }),
+      ...(p.sku && { sku: p.sku }),
+      ...(typeof brand === "string" && brand && { brand: { "@type": "Brand", name: brand } }),
+      offers:
+        p.max_price > p.eff_price
+          ? { "@type": "AggregateOffer", lowPrice: money(p.eff_price), highPrice: money(p.max_price), priceCurrency, availability }
+          : { "@type": "Offer", price: money(p.eff_price), priceCurrency, availability, url: pageUrl },
+    };
+    return { ...titled(name, clip(description), images[0] ?? null), ld };
   }
   if (section === "catalog") {
     const c = url.searchParams.get("c");
@@ -84,7 +128,13 @@ export async function injectShop(env: Env, req: Request, res: Response): Promise
   const boot = await loadBootstrap(env);
   const first = url.pathname.split("/")[1] as Lang;
   const lang = LANGS.includes(first) ? first : boot.store.language;
-  const meta = await pageMeta(env, url, lang, boot);
+  const store = boot.store;
+  const enabled = store.languages.length ? store.languages : [store.language];
+  // a language the shop has switched off points search engines at the main one
+  const canonLang = enabled.includes(lang) ? lang : store.language;
+  const rest = canonicalPath(url);
+  const canonical = rest === null ? null : langUrl(url.origin, canonLang, rest);
+  const meta = await pageMeta(env, url, lang, boot, canonical ?? url.toString());
   const abs = (u: string | null) => (u ? new URL(u, url.origin).toString() : null);
   const t = boot.store.theme;
 
@@ -96,7 +146,13 @@ export async function injectShop(env: Env, req: Request, res: Response): Promise
     `<meta property="og:site_name" content="${esc(boot.store.name)}">`,
     `<meta property="og:title" content="${esc(meta.title)}">`,
     meta.description ? `<meta property="og:description" content="${esc(meta.description)}">` : "",
-    `<meta property="og:url" content="${esc(url.toString())}">`,
+    `<meta property="og:url" content="${esc(canonical ?? url.toString())}">`,
+    canonical === null ? `<meta name="robots" content="noindex">` : `<link rel="canonical" href="${esc(canonical)}">`,
+    rest !== null && enabled.length > 1
+      ? enabled.map((l) => `<link rel="alternate" hreflang="${l}" href="${esc(langUrl(url.origin, l, rest))}">`).join("") +
+        `<link rel="alternate" hreflang="x-default" href="${esc(langUrl(url.origin, store.language, rest))}">`
+      : "",
+    meta.ld ? `<script type="application/ld+json">${scriptJson(meta.ld)}</script>` : "",
     meta.image ? `<meta property="og:image" content="${esc(abs(meta.image)!)}">` : "",
     `<meta name="twitter:card" content="${meta.image ? "summary_large_image" : "summary"}">`,
     boot.store.favicon ? `<link rel="icon" href="${esc(boot.store.favicon)}">` : "",

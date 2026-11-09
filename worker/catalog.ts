@@ -215,7 +215,7 @@ async function variantsFor(env: Env, ids: number[]): Promise<Map<number, Variant
 
 // Effective price (cheapest variant, or the product's own) and stock state,
 // computed in SQL so filters, sorting and paging stay in the database.
-const EFFECTIVE = `
+export const EFFECTIVE = `
   COALESCE((SELECT MIN(COALESCE(v.price, p.price)) FROM product_variants v WHERE v.product_id = p.id), p.price) AS eff_price,
   CASE WHEN EXISTS (SELECT 1 FROM product_variants v WHERE v.product_id = p.id)
        THEN EXISTS (SELECT 1 FROM product_variants v WHERE v.product_id = p.id AND (v.stock IS NULL OR v.stock > 0))

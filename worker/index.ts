@@ -4,6 +4,7 @@ import { serveImage } from "./images";
 import { getBootstrap, getCategories, getPage, getProduct, getStore, listFilters, listProducts } from "./catalog";
 import { injectShop, rootRedirect } from "./html";
 import { createOrder } from "./orders";
+import { robots, sitemap } from "./seo";
 import * as A from "./admin";
 import * as C from "./admin-catalog";
 import * as O from "./admin-orders";
@@ -26,6 +27,8 @@ const router = new Router()
   .get("/api/pages/:slug", getPage)
   .post("/api/orders", createOrder)
   .get("/images/*key", serveImage)
+  .get("/robots.txt", robots)
+  .get("/sitemap.xml", sitemap)
   // admin
   .get("/api/admin/setup-status", A.setupStatus)
   .post("/api/admin/setup", A.setup)

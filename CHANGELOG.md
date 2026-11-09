@@ -4,6 +4,16 @@ Versiya nömrəsi admin panelin **Hesab** bölməsində görünür. Yeniləmək 
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar [SemVer](https://semver.org/).
 
+## [1.1.0] — 2026-11-09
+
+### Əlavə edildi
+- Axtarış sistemləri üçün `/sitemap.xml` (bütün məhsullar, kateqoriyalar, səhifələr, hər aktiv dildə) və `/robots.txt` — Google mağazanı daha tez tapır. Sahibkardan heç nə tələb olunmur.
+- Məhsul səhifəsində Google üçün məhsul məlumatı (ad, şəkil, qiymət, stok vəziyyəti) — axtarış nəticəsində qiymət görünə bilər.
+- Hər səhifədə əsas ünvan (canonical) və dil versiyaları (hreflang); səbət, sifariş, seçilmişlər və axtarış nəticələri indeksə düşmür.
+
+### Dəyişdi
+- Şablondan qalmış lazımsız şəkil faylları silindi.
+
 ## [1.0.0] — 2026-11-09
 
 İlk tam versiya.
