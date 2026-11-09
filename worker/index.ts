@@ -72,6 +72,8 @@ const router = new Router()
   .delete("/api/admin/pages/:id", P.deletePage)
   .get("/api/admin/export", Bk.exportBackup)
   .post("/api/admin/import", Bk.importBackup)
+  .get("/api/admin/backups", Bk.listAutoBackups)
+  .get("/api/admin/backups/:name", Bk.getAutoBackup)
   .get("/api/admin/export/products", Csv.exportProducts)
   .post("/api/admin/import/products", Csv.importProducts);
 
@@ -102,5 +104,17 @@ export default {
       console.error("injectShop", e);
       return asset;
     }
+  },
+
+  // wrangler.jsonc "triggers": weekly backup to R2 + housekeeping
+  async scheduled(_ctrl, env, ctx) {
+    const now = new Date();
+    ctx.waitUntil(
+      env.DB.batch([
+        env.DB.prepare("DELETE FROM sessions WHERE expires_at < ?").bind(now.toISOString()),
+        env.DB.prepare("DELETE FROM rate_limits WHERE window_end < ?").bind(Math.floor(now.getTime() / 1000)),
+      ]).catch((e) => console.error("cleanup", e)),
+    );
+    ctx.waitUntil(Bk.writeAutoBackup(env).catch((e) => console.error("auto backup", e)));
   },
 } satisfies ExportedHandler<Env>;

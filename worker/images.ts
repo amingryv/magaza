@@ -1,10 +1,13 @@
 import type { Ctx } from "./router";
 import { error } from "./http";
 
+export const IMAGE_FOLDERS = new Set(["products", "brand", "categories", "banners"]);
+
 /** GET /images/<key> — serves an R2 object; keys never change, so cache for a year. */
 export async function serveImage({ req, env, params }: Ctx): Promise<Response> {
   const key = params.key;
-  if (!key || key.includes("..")) return error(400, "Yanlış açar");
+  // picture folders only: `backups/` in the same bucket holds customer data
+  if (!key || key.includes("..") || !IMAGE_FOLDERS.has(key.split("/")[0])) return error(404, "Şəkil tapılmadı");
 
   const obj = await env.IMAGES.get(key, { onlyIf: req.headers, range: req.headers });
   if (!obj) return error(404, "Şəkil tapılmadı");

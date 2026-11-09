@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ApiError, call } from "./api";
 import { useAttributes } from "./Attributes";
 import { Card, ConfirmButton } from "./controls";
@@ -19,10 +19,12 @@ const NAMES: Record<string, string> = {
 type BackupFile = { format: string; created_at?: string; tables: Record<string, unknown[]> };
 
 export function Backup() {
+  const [file, setFile] = useState<BackupFile | null>(null);
   return (
     <div className="mx-auto grid w-full max-w-[46rem] gap-4 px-4">
       <SaveBackup />
-      <Restore />
+      <AutoBackups onPick={setFile} />
+      <Restore file={file} setFile={setFile} />
       <Sheet />
     </div>
   );
@@ -52,8 +54,50 @@ function SaveBackup() {
   );
 }
 
-function Restore() {
-  const [file, setFile] = useState<BackupFile | null>(null);
+type Copy = { name: string; size: number; created_at: string };
+
+/** Weekly copies the Worker's cron writes to R2 (last 8). */
+function AutoBackups({ onPick }: { onPick: (f: BackupFile) => void }) {
+  const [items, setItems] = useState<Copy[] | null>(null);
+  const a = useAction();
+  useEffect(() => {
+    call<{ items: Copy[] }>("GET", "backups").then((r) => setItems(r.items), () => setItems([]));
+  }, []);
+  const get = (name: string) => call<BackupFile>("GET", `backups/${name}`);
+
+  return (
+    <Card title="Avtomatik nüsxələr" lead="Hər bazar ertəsi mağaza özü ehtiyat nüsxə çıxarır. Son 8 həftənin nüsxəsi saxlanır.">
+      {items === null ? (
+        <Spinner />
+      ) : items.length === 0 ? (
+        <p className="text-[0.9rem] text-ink-soft">Hələ nüsxə yoxdur. İlk nüsxə ən yaxın bazar ertəsi yaranacaq.</p>
+      ) : (
+        <ul className="grid gap-2">
+          {items.map((c) => (
+            <li key={c.name} className="flex flex-wrap items-center gap-2">
+              <span className="mr-auto text-[0.9rem]">
+                {new Date(c.created_at).toLocaleDateString("az")} <span className="text-ink-soft">· {Math.max(1, Math.round(c.size / 1024))} KB</span>
+              </span>
+              <button
+                className="pill pill-line h-9 px-4"
+                disabled={a.busy}
+                onClick={() => a.run(async () => download(JSON.stringify(await get(c.name)), c.name, "application/json"))}
+              >
+                Yüklə
+              </button>
+              <button className="pill pill-line h-9 px-4" disabled={a.busy} onClick={() => a.run(async () => onPick(await get(c.name)))}>
+                Bərpa et
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {a.err && <div className="mt-3"><Notice>{a.err}</Notice></div>}
+    </Card>
+  );
+}
+
+function Restore({ file, setFile }: { file: BackupFile | null; setFile: (f: BackupFile | null) => void }) {
   const [done, setDone] = useState("");
   const a = useAction();
   const counts = file ? Object.entries(NAMES).map(([t, n]) => `${(file.tables[t] ?? []).length} ${n}`) : [];

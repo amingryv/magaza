@@ -36,15 +36,51 @@ const KEEP = (k: string) => SECRET_PREFIXES.some((p) => k.startsWith(p)) || k ==
 
 export const FORMAT = "magaza-backup";
 
-export const exportBackup = admin(async ({ env }) => {
+/** Every table as one JSON-ready object (the format `importBackup` reads). */
+export async function buildBackup(env: Env) {
   const res = await env.DB.batch(ORDER.map((t) => env.DB.prepare(`SELECT ${TABLES[t].join(", ")} FROM ${t}${t === "settings" ? "" : " ORDER BY id"}`)));
   const tables = Object.fromEntries(ORDER.map((t, i) => [t, res[i].results])) as Record<Table, Record<string, unknown>[]>;
   tables.settings = tables.settings.filter((r) => !KEEP(String(r.key)));
+  return { format: FORMAT, version: 1, app_version: APP_VERSION, created_at: new Date().toISOString(), tables };
+}
+
+export const exportBackup = admin(async ({ env }) => {
   const day = new Date().toISOString().slice(0, 10);
-  return json(
-    { format: FORMAT, version: 1, app_version: APP_VERSION, created_at: new Date().toISOString(), tables },
-    { headers: { "content-disposition": `attachment; filename="magaza-${day}.json"` } },
-  );
+  return json(await buildBackup(env), {
+    headers: { "content-disposition": `attachment; filename="magaza-${day}.json"` },
+  });
+});
+
+/*
+ * Weekly copies in R2 under `backups/` (never served by /images). The cron in
+ * wrangler.jsonc calls `writeAutoBackup`; the panel lists and downloads them.
+ */
+const PREFIX = "backups/";
+const KEEP_COPIES = 8;
+const NAME = /^magaza-d{4}-d{2}-d{2}.json$/;
+
+export async function writeAutoBackup(env: Env) {
+  const name = `magaza-${new Date().toISOString().slice(0, 10)}.json`;
+  await env.IMAGES.put(PREFIX + name, JSON.stringify(await buildBackup(env)), { httpMetadata: { contentType: "application/json" } });
+  const old = (await listCopies(env)).slice(KEEP_COPIES).map((c) => PREFIX + c.name);
+  if (old.length) await env.IMAGES.delete(old);
+}
+
+async function listCopies(env: Env) {
+  const list = await env.IMAGES.list({ prefix: PREFIX, limit: 1000 });
+  return list.objects
+    .map((o) => ({ name: o.key.slice(PREFIX.length), size: o.size, created_at: o.uploaded.toISOString() }))
+    .filter((c) => NAME.test(c.name))
+    .sort((a, b) => b.name.localeCompare(a.name));
+}
+
+export const listAutoBackups = admin(async ({ env }) => json({ items: await listCopies(env) }));
+
+export const getAutoBackup = admin(async ({ env, params }) => {
+  if (!NAME.test(params.name ?? "")) throw new HttpError(400, "Yanlış ad");
+  const obj = await env.IMAGES.get(PREFIX + params.name);
+  if (!obj) throw new HttpError(404, "Nüsxə tapılmadı");
+  return new Response(obj.body, { headers: { "content-type": "application/json", "cache-control": "no-store" } });
 });
 
 const scalar = (v: unknown) => v === null || typeof v === "string" || typeof v === "number" || typeof v === "boolean";

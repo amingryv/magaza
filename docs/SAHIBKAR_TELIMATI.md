@@ -68,6 +68,8 @@ Bir neçə nəfər xəbər almalıdırsa: Telegram-da qrup yaradın, botu qrupa 
 
 Panel → **Ehtiyat nüsxə** → **Ehtiyat nüsxəni yüklə**. Bir fayl yüklənəcək — onu telefonda, kompüterdə və ya Google Drive-da saxlayın. Ayda bir dəfə, böyük dəyişikliklərdən əvvəl də edin.
 
+Mağaza bundan əlavə **hər bazar ertəsi özü** nüsxə çıxarır və son 8 həftənin nüsxəsini saxlayır: **Ehtiyat nüsxə → Avtomatik nüsxələr**. Oradan istənilən nüsxəni yükləyə və ya **Bərpa et** ilə geri qaytara bilərsiniz. Yenə də ayda bir dəfə nüsxəni öz kompüterinizə yükləyin — mağazanın hesabı ilə bağlı problem olsa, sizdə bir nüsxə qalsın.
+
 Faylda məhsullar, kateqoriyalar, sifarişlər və ayarlar var. Şəkillər faylda yoxdur (onlar ayrıca saxlanır və silinmir).
 
 **Bərpa:** eyni bölmədə **Bərpa et** → faylı seçin. Diqqət: bu, saytdakı hazırkı məlumatları fayldakılarla **əvəz edir** (təsdiq üçün düyməni iki dəfə basmaq lazımdır). Sonra səhifəni yeniləyin.

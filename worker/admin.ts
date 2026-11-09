@@ -1,6 +1,7 @@
 import type { Ctx } from "./router";
 import { HttpError, json, readJson } from "./http";
 import { allow, ipKey } from "./ratelimit";
+import { IMAGE_FOLDERS } from "./images";
 import {
   admin,
   currentSession,
@@ -224,7 +225,7 @@ const TYPES: Record<string, string> = {
   "image/gif": "gif",
   "image/avif": "avif",
 };
-const FOLDERS = new Set(["products", "brand", "categories", "banners"]);
+const FOLDERS = IMAGE_FOLDERS;
 const MAX_BYTES = 5 * 1024 * 1024;
 
 /** Raw image body → R2. `?folder=` picks the prefix, `?name=` (uuid[_thumb]) pairs a thumbnail. */

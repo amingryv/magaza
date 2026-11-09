@@ -4,6 +4,15 @@ Versiya nömrəsi admin panelin **Hesab** bölməsində görünür. Yeniləmək 
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar [SemVer](https://semver.org/).
 
+## [1.2.0] — 2026-11-09
+
+### Əlavə edildi
+- Avtomatik ehtiyat nüsxə: mağaza hər bazar ertəsi bütün məlumatların nüsxəsini özü çıxarır və son 8 həftəni saxlayır. Panel → **Ehtiyat nüsxə → Avtomatik nüsxələr** bölməsindən yükləmək və ya bərpa etmək olar.
+- Həmin vaxt köhnə giriş sessiyaları və limit yazıları bazadan təmizlənir.
+
+### Təhlükəsizlik
+- Şəkil ünvanı (`/images/`) yalnız şəkil qovluqlarını açır.
+
 ## [1.1.0] — 2026-11-09
 
 ### Əlavə edildi
