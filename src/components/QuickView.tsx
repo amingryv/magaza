@@ -256,7 +256,7 @@ export function QuickViewProvider({ children }: { children: React.ReactNode }) {
     timers.current = [];
     cancelAnimationFrame(raf.current);
     raf.current = 0;
-    const card = from.current?.photo.closest<HTMLElement>(".card");
+    const card = from.current?.photo.closest<HTMLElement>(".card, .spot");
     card?.removeAttribute("data-flying");
     unlock.current?.();
     unlock.current = null;
@@ -339,7 +339,7 @@ export function QuickViewProvider({ children }: { children: React.ReactNode }) {
     measure();
     ents.current = Array.from(layer.current?.querySelectorAll<HTMLElement>(".ent") ?? []);
     E.current = ents.current.map(() => spring(0, 260, 22));
-    from.current?.photo.closest(".card")?.setAttribute("data-flying", "");
+    from.current?.photo.closest(".card, .spot")?.setAttribute("data-flying", "");
     phase.current = "opening";
     const p = P.current;
     p.k = K_OPEN;

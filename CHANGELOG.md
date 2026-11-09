@@ -4,6 +4,17 @@ Versiya nömrəsi admin panelin **Hesab** bölməsində görünür. Yeniləmək 
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar [SemVer](https://semver.org/).
 
+## [1.4.0] — 2026-11-09
+
+### Dəyişdi (görünüş)
+- Yuxarı panel nazik və yarışəffafdır; kompüterdə ortada əsas kateqoriyalar kiçik yazı ilə, sağda axtarış, seçilmişlər və səbət.
+- Ana səhifə: mağaza adının altında qısa təsvir; “seçilmiş” məhsullar böyük boz plitələrdə (biri geniş, ikisi yan-yana) ad, qısa cümlə, qiymət və “Ətraflı” düyməsi ilə; bütün kateqoriyalar şəkilli sürüşən sırada.
+- Məhsul kartında rəngləri olan məhsul üçün rəng nöqtələri.
+- Aşağı hissə (footer) boz fonda, kiçik yazı ilə: Kataloq, Məlumat, Əlaqə sütunları.
+
+### Düzəldildi
+- Demo şəkilləri (`npm run db:seed:local`) yenidən görünür: `/images` `demo/` qovluğunu da verir.
+
 ## [1.3.0] — 2026-11-09
 
 ### Əlavə edildi

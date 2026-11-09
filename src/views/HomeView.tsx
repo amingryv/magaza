@@ -1,12 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { useSite } from "@/lib/site";
 import { tr } from "@/lib/i18n";
 import { whatsappLink } from "@/lib/order";
 import { useProducts } from "@/lib/api";
+import type { Product } from "@/lib/catalog-types";
+import { hasPriceRange, minPrice } from "@/lib/catalog";
+import { formatPrice } from "@/lib/format";
+import { productHref } from "@/components/ProductCard";
+import { ProductImage } from "@/components/ProductImage";
+import { useQuickView } from "@/components/QuickView";
 import { ProductGrid } from "@/components/ProductGrid";
 import { useSearch } from "@/components/Search";
 import { WhatsAppIcon } from "@/components/BrandIcons";
@@ -17,10 +23,11 @@ export function HomeView() {
     <>
       <Hero />
       <Banners />
+      <Spotlight />
+      <CategoryRail />
       <FeaturedCategories />
       <Shop />
       <HowItGoes />
-      <Picks />
       <Visit />
     </>
   );
@@ -62,6 +69,7 @@ function Hero() {
             })
           : store.name}
       </h1>
+      {tr(store.tagline, lang) && <p className="hero-tag">{tr(store.tagline, lang)}</p>}
       <button type="button" onClick={search.open} className="hero-search" aria-haspopup="dialog">
         <IconSearch size={19} className="shrink-0" />
         <span className="truncate">{t.home.searchPh}</span>
@@ -220,19 +228,92 @@ function HowItGoes() {
   );
 }
 
-/* ---------- the week's picks: four cards, the same grid ---------- */
+/* ---------- spotlight: the featured products as large tiles ----------
+   One wide tile, then two side by side, each with its name, a line about it
+   and the price over a big picture. A tap flies it into the quick view,
+   like a card. */
 
-function Picks() {
+function Spotlight() {
   const { t, ready } = useSite();
-  // featured first (the "popular" order), only what can be bought now
-  const { items: products } = useProducts(ready ? { inStock: true, limit: 4 } : null);
-  if (!products.length) return null;
+  const { items } = useProducts(ready ? { featured: true, sort: "popular", limit: 3 } : null);
+  if (!items.length) return null;
   return (
-    <section aria-labelledby="picks" className="wrap mt-16 md:mt-24">
-      <SectionHead id="picks" title={t.home.gamingKicker} link={{ to: "/catalog/", label: t.home.browse }} />
-      <div className="mt-6">
-        <ProductGrid products={products} />
+    <section aria-labelledby="spot" className="wrap mb-14 md:mb-20">
+      <h2 id="spot" className="sr-only">
+        {t.home.gamingKicker}
+      </h2>
+      <div className="spot-grid">
+        {items.map((p, i) => (
+          <SpotTile key={p.id} product={p} wide={i === 0} />
+        ))}
       </div>
+    </section>
+  );
+}
+
+function SpotTile({ product, wide }: { product: Product; wide: boolean }) {
+  const { t, lang, href } = useSite();
+  const { open } = useQuickView();
+  const photo = useRef<HTMLSpanElement>(null);
+  const name = useRef<HTMLSpanElement>(null);
+  const price = useRef<HTMLElement>(null);
+  const label = tr(product.name, lang);
+  const summary = tr(product.summary, lang);
+  return (
+    <a
+      href={productHref(href, product)}
+      className="spot"
+      data-wide={wide || undefined}
+      onClick={(e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+        e.preventDefault();
+        if (photo.current && name.current && price.current) open(product, { photo: photo.current, name: name.current, price: price.current });
+      }}
+    >
+      <span className="spot-text">
+        {product.brand && <span className="spot-eyebrow">{product.brand}</span>}
+        <span className="spot-name">
+          <span ref={name}>{label}</span>
+        </span>
+        {summary && <span className="spot-lead">{summary}</span>}
+        <span className="spot-price num">
+          {hasPriceRange(product) && <span>{t.product.from} </span>}
+          <b ref={price}>{formatPrice(minPrice(product))}</b>
+        </span>
+        <span className="spot-more">
+          {t.home.more}
+          <IconArrow size={16} />
+        </span>
+      </span>
+      <span ref={photo} className="frame spot-frame">
+        <ProductImage product={product} size="hero" priority={wide} />
+      </span>
+    </a>
+  );
+}
+
+/* ---------- every top category as a small tile in one swipeable row ---------- */
+
+function CategoryRail() {
+  const { t, lang, href, categories } = useSite();
+  if (categories.length < 2) return null;
+  return (
+    <section aria-labelledby="rail" className="wrap mb-14 md:mb-20">
+      <h2 id="rail" className="section-title">
+        {t.home.categories}
+      </h2>
+      <ul className="rail no-scrollbar">
+        {categories.map((c) => (
+          <li key={c.id}>
+            <Link href={href(`/catalog/?c=${c.id}`)} className="rail-item">
+              <span className="frame rail-frame">
+                <ProductImage product={{ category: c.id, brand: "", images: c.image ? [c.image] : [] }} size="thumb" />
+              </span>
+              <span className="rail-name">{tr(c.name, lang)}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

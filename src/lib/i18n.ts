@@ -60,6 +60,8 @@ const az = {
     visitKicker: "Mağaza",
     visitTitle: "Gəlin, yerində baxın",
     writeUs: "WhatsApp-da yazın",
+    more: "Ətraflı",
+    categories: "Kateqoriyalar",
     sample: "Nümunə",
   },
   catalog: {
@@ -201,6 +203,7 @@ const az = {
   },
   footer: {
     rights: "Bütün hüquqlar qorunur.",
+    info: "Məlumat",
     photos: "Foto",
   },
 };
@@ -243,6 +246,8 @@ const ru: Dict = {
     visitKicker: "Магазин",
     visitTitle: "Приходите посмотреть вживую",
     writeUs: "Написать в WhatsApp",
+    more: "Подробнее",
+    categories: "Категории",
     sample: "Пример",
   },
   catalog: {
@@ -384,6 +389,7 @@ const ru: Dict = {
   },
   footer: {
     rights: "Все права защищены.",
+    info: "Информация",
     photos: "Фото",
   },
 };
@@ -426,6 +432,8 @@ const en: Dict = {
     visitKicker: "The shop",
     visitTitle: "Come and see it in person",
     writeUs: "Message on WhatsApp",
+    more: "Learn more",
+    categories: "Categories",
     sample: "Sample",
   },
   catalog: {
@@ -567,6 +575,7 @@ const en: Dict = {
   },
   footer: {
     rights: "All rights reserved.",
+    info: "Information",
     photos: "Photos",
   },
 };

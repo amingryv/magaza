@@ -1,7 +1,7 @@
 import type { Ctx } from "./router";
 import { error } from "./http";
 
-export const IMAGE_FOLDERS = new Set(["products", "brand", "categories", "banners"]);
+export const IMAGE_FOLDERS = new Set(["products", "brand", "categories", "banners", "demo"]);
 
 /** GET /images/<key> — serves an R2 object; keys never change, so cache for a year. */
 export async function serveImage({ req, env, params }: Ctx): Promise<Response> {

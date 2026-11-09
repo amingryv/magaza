@@ -21,6 +21,7 @@ export function ProductGrid({ products, listKey = "", skeleton = 0 }: { products
           <div className="card card-skel">
             <span className="frame" />
             <span className="card-info">
+              <span className="card-dots" />
               <span className="card-eyebrow" />
               <span className="card-name" />
               <span className="card-price" />

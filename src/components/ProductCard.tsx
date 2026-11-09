@@ -22,7 +22,8 @@ function isNew(p: Product) {
 }
 
 /**
- * A product card: the picture in its grey frame on top, then one small line
+ * A product card: the picture in its grey frame on top, colour dots (an
+ * empty line when there are none), then one small line
  * (a sale, "new", or the brand), the name on one line and the price.
  * Every line has a fixed height, so the cards in a row always line up,
  * whatever the picture or the name. Tapping does not navigate: the picture,
@@ -41,6 +42,8 @@ export function ProductCard({ product, priority = false }: { product: Product; p
   const stock = totalStock(product);
   const label = tr(product.name, lang);
   const saved = fav.has(product.id);
+  // colour dots under the picture, when the product comes in colours
+  const colours = product.options.find((o) => o.values.length > 1 && o.values.every((x) => x.swatch))?.values ?? [];
 
   const sale = v.oldPrice && v.oldPrice > v.price ? Math.round((1 - v.price / v.oldPrice) * 100) : 0;
   const eyebrow =
@@ -68,6 +71,12 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           <ProductImage product={product} priority={priority} />
         </span>
         <span className="card-info">
+          <span className="card-dots" aria-hidden>
+            {colours.slice(0, 5).map((c) => (
+              <i key={c.id} style={{ "--c": c.swatch } as React.CSSProperties} />
+            ))}
+            {colours.length > 5 && <em>+{colours.length - 5}</em>}
+          </span>
           <span className="card-eyebrow" data-tone={eyebrow.hot ? "hot" : undefined}>
             {eyebrow.text}
           </span>

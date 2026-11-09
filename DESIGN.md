@@ -1,6 +1,6 @@
 # Design system: one white theme
 
-The site has one theme: white. Type and primary buttons are black. Product pictures and quiet panels sit on soft grey (`--tile` #f5f5f7, `--paper-2`). Nothing has a box-shadow and nothing is 3D. Surfaces are separated by space, grey fills and 1px hairlines, drawn as `outline` with a negative offset so they never move layout. The only blur is the frosted phone tab bar and the search backdrop.
+The site has one theme: white. Type and primary buttons are black. Product pictures and quiet panels sit on soft grey (`--tile` #f5f5f7, `--paper-2`). Nothing has a box-shadow and nothing is 3D. Surfaces are separated by space, grey fills and 1px hairlines, drawn as `outline` with a negative offset so they never move layout. Blur is used only on the frosted header, the phone tab bar and the search backdrop.
 
 ## Owner colours
 
@@ -19,13 +19,17 @@ Every product picture (card, detail, flight, search, cart, order) sits in a `.fr
 - A photo with its own background gets rounded corners on its real box, so it reads as a print in the frame.
 - No picture or a broken link shows a line drawing for the category (phones, laptops, tablets, audio, watches, gaming, accessories, plus common synonyms; anything else gets a parcel) and the brand name. There is never an empty box or a broken-image icon.
 
+## Header and footer
+
+The header is a thin frosted bar: name, then (desktop) the catalogue, up to six top categories and contact in 0.8rem type, then bare round icons (search, favourites on desktop, bag). The footer is #f5f5f7 with small type: name + tagline + WhatsApp, then Catalogue / Information (pages, favourites, contact) / Contact columns, then the fine print.
+
 ## Cards
 
-Frame on top, then three fixed-height lines: an eyebrow (sale / new / brand / out of stock), the name on one line, and the price. Rows always line up. Hover scales only the picture (1.04). The heart sits top-right in the frame. Grid: 2 / 3 / 4 columns. The grid is plain CSS; it fades up once when the list changes.
+Frame on top, then a fixed-height row of colour dots (empty when the product has no colour swatches, max 5 + "+N"), then three fixed-height lines: an eyebrow (sale / new / brand / out of stock), the name on one line, and the price. Rows always line up. Hover scales only the picture (1.04). The heart sits top-right in the frame. Grid: 2 / 3 / 4 columns. The grid is plain CSS; it fades up once when the list changes.
 
 ## Home
 
-The shop's name, large, letters rising one after another, then a search bar that opens the search card. After that: all products (chips filter in place, 8 cards), "How it works" as one grey row of three steps, the week's picks (one row of four), and a single row with the address, hours and the WhatsApp button.
+The shop's name, large, letters rising one after another, the tagline, then a search bar that opens the search card. After that: banners, the spotlight (featured products as big grey 28px tiles, one wide then two side by side; text centred above the picture; a tap flies into the quick view like a card), a swipeable row of all top categories, the owner's featured categories, all products (chips filter in place, 8 cards), "How it works" as one grey row of three steps, and a single row with the address, hours and the WhatsApp button.
 
 ## Search (`Search.tsx`)
 

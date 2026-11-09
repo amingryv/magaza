@@ -3,16 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { motion } from "motion/react";
 import { useSite } from "@/lib/site";
+import { tr } from "@/lib/i18n";
 import { LangSwitch } from "./LangSwitch";
 import { BagButton } from "./BagButton";
 import { useSearch } from "./Search";
-import { IconSearch } from "./Icons";
+import { IconHeart, IconSearch } from "./Icons";
 
-/** Plain white bar; a hairline appears under it once the page scrolls. */
+/**
+ * A thin frosted bar. On a desktop the middle carries the shop's top
+ * categories in small type; on a phone only the name, search and bag stay
+ * (the tab bar at the bottom does the rest). A hairline appears once the
+ * page scrolls.
+ */
 export function Header() {
-  const { t, store, href } = useSite();
+  const { t, store, href, categories, lang } = useSite();
   const search = useSearch();
   const path = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -34,47 +39,44 @@ export function Header() {
     };
   }, []);
 
+  // the catalogue, up to six top categories, contact
   const links = [
-    { to: "/catalog/", label: t.nav.catalog },
-    { to: "/favorites/", label: t.nav.favorites },
-    { to: "/about/", label: t.nav.contact },
+    { to: "/catalog/", label: t.nav.catalog, page: "/catalog/" },
+    ...categories.slice(0, 6).map((c) => ({ to: `/catalog/?c=${c.id}`, label: tr(c.name, lang), page: "" })),
+    { to: "/about/", label: t.nav.contact, page: "/about/" },
   ];
-  const isOn = (to: string) => path.startsWith(href(to).replace(/\/$/, ""));
+  const isOn = (page: string) => !!page && path.startsWith(href(page).replace(/\/$/, ""));
+  const favOn = isOn("/favorites/");
 
   return (
     <header className="site-head" data-scrolled={scrolled || undefined}>
-      <div className="wrap flex h-16 items-center gap-3 md:h-[4.25rem] md:gap-6">
-        <Link href={href("/")} className="mr-auto shrink-0 text-[1.45rem] font-[700] tracking-[-0.045em] md:mr-0" aria-label={store.name}>
+      <div className="wrap flex h-14 items-center gap-2 md:h-[3.25rem] md:gap-6">
+        <Link href={href("/")} className="head-name mr-auto md:mr-0" aria-label={store.name}>
           <span data-store="name" suppressHydrationWarning>
             {store.name}
           </span>
         </Link>
 
-        <nav aria-label={t.nav.menu} className="hidden flex-1 justify-center md:flex">
-          <ul className="flex items-center gap-1">
-            {links.map((l) => {
-              const on = isOn(l.to);
-              return (
-                <li key={l.to}>
-                  <Link
-                    href={href(l.to)}
-                    aria-current={on ? "page" : undefined}
-                    className={`relative block rounded-full px-4 py-2 text-[0.92rem] font-medium transition-colors ${on ? "text-ink" : "text-ink-soft hover:text-ink"}`}
-                  >
-                    {on && <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full bg-paper-2" transition={{ type: "spring", stiffness: 500, damping: 40 }} />}
-                    <span className="relative">{l.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
+        <nav aria-label={t.nav.menu} className="hidden min-w-0 flex-1 justify-center md:flex">
+          <ul className="flex min-w-0 items-center gap-1 lg:gap-3">
+            {links.map((l) => (
+              <li key={l.to} className="min-w-0">
+                <Link href={href(l.to)} aria-current={isOn(l.page) ? "page" : undefined} className="head-link">
+                  {l.label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </nav>
 
-        <div className="flex items-center gap-1.5">
-          <LangSwitch className="hidden md:flex" />
-          <button type="button" className="orb orb-quiet" onClick={search.open} aria-label={t.nav.search} aria-haspopup="dialog">
-            <IconSearch size={20} />
+        <div className="flex items-center gap-0.5">
+          <LangSwitch className="mr-1 hidden md:flex" />
+          <button type="button" className="orb" onClick={search.open} aria-label={t.nav.search} aria-haspopup="dialog">
+            <IconSearch size={19} />
           </button>
+          <Link href={href("/favorites/")} className="orb !hidden md:!grid" aria-label={t.nav.favorites} aria-current={favOn ? "page" : undefined}>
+            <IconHeart size={19} />
+          </Link>
           <BagButton />
         </div>
       </div>
