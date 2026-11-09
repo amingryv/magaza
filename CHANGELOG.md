@@ -4,6 +4,20 @@ Versiya nömrəsi admin panelin **Hesab** bölməsində görünür. Yeniləmək 
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar [SemVer](https://semver.org/).
 
+## [2.0.0] — 2026-11-09
+
+Yeni görünüşün (1.4.0–1.6.0) son mərhələsi. Məlumatlar və ayarlar olduğu kimi qalır.
+
+### Dəyişdi (görünüş)
+- Əsas şrift **Geist**-dir (Azərbaycan və rus hərfləri ilə). Şrifti əvvəllər “Görünüş” bölməsində özünüz seçmisinizsə, seçiminiz qalır; Inter Tight da siyahıdadır.
+- Kataloqda çox seçimi olan filtr (məs. 30 rəng) əvvəlcə 10 seçim göstərir, qalanı “+N daha” ilə açılır.
+
+### Düzəldi
+- Səbət səhifəsində başlıqdakı məhsul sayı yekun paneli ilə həmişə eyni olur (artıq satılmayan variant səbətdə qalanda fərqlənirdi).
+
+### Yoxlandı
+- Bütün mağaza səhifələri kompüterdə və telefon ölçüsündə yoxlandı: yana sürüşmə və xəta yoxdur.
+
 ## [1.6.0] — 2026-11-09
 
 ### Dəyişdi (görünüş)

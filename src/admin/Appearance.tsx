@@ -19,14 +19,15 @@ import { FONTS } from "@/shared/settings";
 type Banner = { image: string; title: LocalValue; subtitle: LocalValue; link: string };
 
 const FONT_NAMES: Record<string, string> = {
-  "Inter Tight": "Inter Tight — sadə",
+  Geist: "Geist — sadə, müasir",
+  "Inter Tight": "Inter Tight — sıx",
   Manrope: "Manrope — yumşaq",
   Montserrat: "Montserrat — enli",
   Onest: "Onest — müasir",
   "Playfair Display": "Playfair — zərif",
   System: "Telefonun öz şrifti",
 };
-const fontCss = (f: string) => `${FONTS[f] ?? FONTS["Inter Tight"]}, system-ui, sans-serif`;
+const fontCss = (f: string) => `${FONTS[f] ?? FONTS.Geist}, system-ui, sans-serif`;
 
 /** "/images/brand/x.webp" → "brand/x.webp" for our own uploads, else null. */
 const keyOf = (url: string) => (/^\/images\/(brand|banners)\//.test(url) ? url.slice(8) : null);
@@ -57,7 +58,7 @@ function Editor({ s, onSaved }: { s: S; onSaved: () => void }) {
     favicon: str(s["store.favicon"]),
     ink: str(s["theme.primary_color"]) || "#0a0a0a",
     accent: str(s["theme.secondary_color"]) || "#ff6f5e",
-    font: str(s["theme.font"]) in FONTS ? str(s["theme.font"]) : "Inter Tight",
+    font: str(s["theme.font"]) in FONTS ? str(s["theme.font"]) : "Geist",
     layout: s["theme.layout"] === "list" ? "list" : "grid",
     banners: rawBanners
       .filter((b) => typeof b?.image === "string")

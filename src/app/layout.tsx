@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource-variable/inter-tight";
+import "@fontsource-variable/geist";
 // the owner's other font choices (theme.font); a face downloads only when used
+import "@fontsource-variable/inter-tight";
 import "@fontsource-variable/manrope";
 import "@fontsource-variable/montserrat";
 import "@fontsource-variable/onest";

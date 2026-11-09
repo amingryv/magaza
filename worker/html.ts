@@ -140,7 +140,7 @@ export async function injectShop(env: Env, req: Request, res: Response): Promise
 
   const head = [
     `<style id="brand">:root{--brand-paper:${t.paper};--brand-ink:${t.primary};--brand-accent:${t.secondary}${
-      t.font !== "Inter Tight" ? `;--font-sans:${FONTS[t.font]},system-ui,-apple-system,"Segoe UI",sans-serif` : ""
+      t.font !== "Geist" ? `;--font-sans:${FONTS[t.font]},system-ui,-apple-system,"Segoe UI",sans-serif` : ""
     }}</style>`,
     `<meta property="og:type" content="website">`,
     `<meta property="og:site_name" content="${esc(boot.store.name)}">`,

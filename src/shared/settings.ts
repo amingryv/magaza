@@ -7,10 +7,11 @@ import type { ApiStore, FormField, Lang, Text } from "./api-types";
  * Nothing here is shop-specific.
  */
 /** Code version, shown in the admin panel; bump it with CHANGELOG.md. */
-export const APP_VERSION = "1.6.0";
+export const APP_VERSION = "2.0.0";
 
 /** Fonts bundled into the build (CSS family names). Only these reach the page's CSS. */
 export const FONTS: Record<string, string> = {
+  Geist: '"Geist Variable"',
   "Inter Tight": '"Inter Tight Variable"',
   Manrope: '"Manrope Variable"',
   Montserrat: '"Montserrat Variable"',
@@ -38,7 +39,7 @@ export const DEFAULTS: Record<string, unknown> = {
   "theme.primary_color": "#0a0a0a",
   "theme.secondary_color": "#ff6f5e",
   "theme.paper_color": "#ffffff",
-  "theme.font": "Inter Tight",
+  "theme.font": "Geist",
   "theme.layout": "grid",
   "contact.phone": "",
   "contact.whatsapp": "",
@@ -101,7 +102,7 @@ export function publicStore(rows: Record<string, string>): ApiStore {
       primary: color(get("theme.primary_color"), "#0a0a0a"),
       secondary: color(get("theme.secondary_color"), "#ff6f5e"),
       paper: color(get("theme.paper_color"), "#ffffff"),
-      font: str(get("theme.font")) in FONTS ? str(get("theme.font")) : "Inter Tight",
+      font: str(get("theme.font")) in FONTS ? str(get("theme.font")) : "Geist",
       layout: get("theme.layout") === "list" ? "list" : "grid",
     },
     contact: {

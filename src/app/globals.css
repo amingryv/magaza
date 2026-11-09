@@ -48,7 +48,7 @@
   --color-wa: var(--wa);
   --color-danger: var(--danger);
   --color-ok: var(--ok);
-  --font-sans: "Inter Tight Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: "Geist Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 /* ---------- base ---------- */

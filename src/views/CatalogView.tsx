@@ -312,13 +312,21 @@ function Filters({ filters, chosen, stockOnly, min, max, onChange }: FilterProps
   const label = (f: ApiFilter, v: string) =>
     f.type === "boolean" ? (v === "1" ? t.product.yes : t.product.no) : `${filterText(f, lang, ctx.main, v)}${f.unit ? ` ${f.unit}` : ""}`;
 
+  // Long facets (e.g. thirty colours) show the first few plus anything chosen; the rest open on demand.
+  const [opened, setOpened] = useState<Record<string, boolean>>({});
+  const FOLD = 10;
+
   return (
     <div className="grid gap-7 pt-2">
-      {filters.map((f) => (
+      {filters.map((f) => {
+        const folds = f.values.length > FOLD + 2;
+        const open = !folds || opened[f.key];
+        const shown = open ? f.values : f.values.filter((x, i) => i < FOLD || (chosen[f.key] ?? []).includes(x.value));
+        return (
         <fieldset key={f.key}>
           <legend className="mb-3 text-[0.85rem] font-semibold">{filterText(f, lang, ctx.main)}</legend>
           <div className="flex flex-wrap gap-2">
-            {f.values.map(({ value, hex }) => {
+            {shown.map(({ value, hex }) => {
               const on = (chosen[f.key] ?? []).includes(value);
               const id = `${f.key}-${value}`;
               return (
@@ -329,9 +337,20 @@ function Filters({ filters, chosen, stockOnly, min, max, onChange }: FilterProps
                 </button>
               );
             })}
+            {folds && (
+              <button
+                type="button"
+                className="h-9 px-2 text-[0.85rem] font-medium text-ink-soft underline-offset-4 hover:text-ink hover:underline"
+                aria-expanded={open}
+                onClick={() => setOpened((o) => ({ ...o, [f.key]: !open }))}
+              >
+                {open ? t.catalog.showLess : t.catalog.showAll(f.values.length - shown.length)}
+              </button>
+            )}
           </div>
         </fieldset>
-      ))}
+        );
+      })}
 
       <fieldset>
         <legend className="mb-3 text-[0.85rem] font-semibold">{t.catalog.price}</legend>

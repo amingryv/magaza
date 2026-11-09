@@ -8,7 +8,7 @@ Settings `theme.primary_color` (ink), `theme.secondary_color` (accent) and `them
 
 ## Type
 
-Inter Tight Variable, self-hosted (`@fontsource-variable/inter-tight`; covers Azerbaijani Latin and Cyrillic). Page titles use `.page-title` (2.1 → 3rem, 650) and section titles `.section-title` (1.55 → 2.1rem). Labels are sentence case, not uppercase. Prices are tabular with no-break spaces: `2 399 ₼`.
+Geist Variable, self-hosted (`@fontsource-variable/geist`; covers Azerbaijani Latin (ə, ğ, ş) and Cyrillic). It is the default `theme.font`; the owner can still pick Inter Tight, Manrope, Montserrat, Onest, Playfair or the phone's own font. Page titles use `.page-title` (2.1 → 3rem, 650) and section titles `.section-title` (1.55 → 2.1rem). Labels are sentence case, not uppercase. Prices are tabular with no-break spaces: `2 399 ₼`.
 
 ## Pictures: one frame for everything (`ProductImage.tsx`)
 
@@ -42,6 +42,18 @@ The magnifier (header, phone tab bar, hero) opens a white card over a frosted wh
 - The phone tab bar stays above the detail. Any tab, the bag in the detail, and checkout close the detail first.
 - Only transform, opacity and clip-path animate. `scrollbar-gutter: stable` plus locking before measuring keep the page from shifting. There is one shared scroll lock (`lib/scroll-lock.ts`).
 
-## Order page
+## Catalogue
 
-There are two ways to send. "WhatsApp ilə sifariş et" opens WhatsApp with the message. "Sifariş et" goes to the shop; in phase 3 it is written to D1 via `NEXT_PUBLIC_ORDERS_API`.
+From 1024px the filters live in a sidebar (`.catalog-split`); below that they open in a bottom sheet. A facet with more than twelve values shows the first ten plus any chosen ones, then a "+N daha" link. Chosen filters repeat above the grid as chips (`.chip-on`), each removable with one tap, plus "Sıfırla".
+
+## Product page
+
+Gallery on the left (sticky on desktop) with thumbnails under it. Options are bordered pills (`.seg`), colours are swatches. When the add button scrolls away, a thin buy bar (`.buybar`) shows the product, the chosen variant, the price and the button. Description and the specs table run full width below, side by side on desktop.
+
+## Cart, order, sent
+
+The cart page has two columns on desktop: lines on the left, a sticky grey summary on the right (total, share meter, delivery note, checkout). Its item count only counts lines that still match a product. The order form is one page of numbered steps (contact, delivery, confirm); on phones the summary folds into one line above the form. The sent page shows the order number, what was ordered, and three next steps. "Sifariş et" writes the order to D1 (`POST /api/orders`); the WhatsApp button appears only after that, when the owner turned it on.
+
+## Checked
+
+v2.0.0 was checked at 1440px and at 390px with mobile emulation: home, catalogue, product, cart, order, contact and favourites, in AZ and RU. No horizontal scroll and no console errors.

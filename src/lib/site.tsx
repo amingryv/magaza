@@ -84,7 +84,7 @@ export function SiteProvider({ lang, children }: { lang: Lang; children: React.R
     s.setProperty("--brand-paper", data.store.theme.paper);
     s.setProperty("--brand-ink", data.store.theme.ink);
     s.setProperty("--brand-accent", data.store.theme.accent);
-    if (data.store.theme.font !== "Inter Tight") s.setProperty("--font-sans", `${FONTS[data.store.theme.font]}, system-ui, sans-serif`);
+    if (data.store.theme.font !== "Geist") s.setProperty("--font-sans", `${FONTS[data.store.theme.font]}, system-ui, sans-serif`);
     if (data.store.theme.layout === "list") document.documentElement.dataset.layout = "list";
   }, [b, data.store.theme]);
 
