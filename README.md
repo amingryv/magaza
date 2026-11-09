@@ -110,3 +110,7 @@ Panel → Workers & Pages → Worker → Settings → Domains & Routes → Custo
 - [`docs/TEHVIL.md`](docs/TEHVIL.md) — yeni mağazanı quran və təhvil verən üçün yoxlama siyahısı
 - [`docs/SAHIBKAR_TELIMATI.md`](docs/SAHIBKAR_TELIMATI.md) — sahibkar üçün sadə təlimat (məhsul, sifariş, Telegram, ehtiyat nüsxə, şifrə sıfırlama, yeniləmə)
 - [`CHANGELOG.md`](CHANGELOG.md) — versiyalar
+
+## Lisenziya
+
+Müəllif hüquqları qorunur, bax [`LICENSE`](LICENSE). Repo yalnız Deploy düyməsinin işləməsi üçün açıqdır; lisenziya almış sahibkar kodu bir mağaza üçün işlədə və dəyişə bilər, yenidən yaymaq və satmaq qadağandır.

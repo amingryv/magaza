@@ -4,6 +4,14 @@ Versiya nömrəsi admin panelin **Hesab** bölməsində görünür. Yeniləmək 
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar [SemVer](https://semver.org/).
 
+## [2.2.1] — 2026-11-10
+
+### Əlavə olundu
+- `LICENSE`: müəllif hüquqları qorunur. Lisenziya almış sahibkar kodu bir mağaza üçün işlədə və dəyişə bilər; yenidən yaymaq və satmaq qadağandır.
+
+### Silindi
+- Köhnə demo fotolar git tarixçəsindən də silindi. Repo 44 MB-dan təxminən 0.5 MB-a düşdü.
+
 ## [2.2.0] — 2026-11-10
 
 Şablon təmizləndi: hər sahəyə uyğun, GitHub-dan sıfırdan qurulan vəziyyətdədir. Mövcud mağazaların məlumatlarına və ayarlarına toxunulmur.

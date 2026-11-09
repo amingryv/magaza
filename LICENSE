@@ -1,0 +1,39 @@
+Copyright (c) 2026 amingryv. All rights reserved.
+
+MAĞAZA ŞABLONU — İSTİFADƏ LİSENZİYASI
+
+Bu proqram təminatı (kod, dizayn və sənədlər) müəllif hüquqları ilə qorunur.
+Repozitoriyanın açıq olması yalnız "Deploy to Cloudflare" düyməsinin işləməsi
+üçündür və kodun sərbəst istifadəsinə icazə demək deyil.
+
+1. İcazə verilir: müəllifdən lisenziya almış şəxs (sahibkar) bu kodu öz
+   GitHub və Cloudflare hesabına kopyalaya, bir (1) mağaza saytı kimi işlədə,
+   öz mağazası üçün dəyişə və müəllifin yeniləmələrini ala bilər.
+2. Qadağandır: müəllifin yazılı icazəsi olmadan kodu və ya onun bir hissəsini
+   satmaq, başqasına vermək, yenidən yaymaq, üçüncü şəxslər üçün sayt qurmaq
+   və ya ondan oxşar məhsul/xidmət hazırlamaq.
+3. Proqram "olduğu kimi" (AS IS) verilir. Müəllif onun istifadəsindən yaranan
+   heç bir zərərə görə məsuliyyət daşımır.
+
+İcazə və əlavə lisenziya üçün müəlliflə əlaqə saxlayın: https://github.com/amingryv
+
+---
+
+STOREFRONT TEMPLATE — LICENCE (English)
+
+This software (code, design and documentation) is protected by copyright.
+The repository is public only so that the "Deploy to Cloudflare" button works;
+this does not grant permission to use the code freely.
+
+1. Permitted: a person who has obtained a licence from the author (the shop
+   owner) may copy this code to their own GitHub and Cloudflare accounts, run it
+   as one (1) shop website, modify it for that shop, and receive the author's
+   updates.
+2. Prohibited without the author's written permission: selling, sublicensing,
+   giving away or redistributing the code or any part of it, building sites for
+   third parties with it, or creating a similar product or service from it.
+3. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. IN NO EVENT
+   SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING
+   FROM THE USE OF THE SOFTWARE.
+
+For permission or additional licences contact the author: https://github.com/amingryv
