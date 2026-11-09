@@ -7,7 +7,7 @@ import { useSite } from "@/lib/site";
 import { tr } from "@/lib/i18n";
 import { useProduct, useProducts } from "@/lib/api";
 import { stillness } from "@/lib/spring";
-import { ProductDetail } from "@/components/ProductDetail";
+import { ProductAbout, ProductDetail } from "@/components/ProductDetail";
 import { ProductGrid } from "@/components/ProductGrid";
 import type { Product } from "@/lib/catalog-types";
 
@@ -75,13 +75,17 @@ function ProductPage({ product }: { product: Product }) {
         data-tone=""
         className="relative pb-6 pt-4 md:pb-10 md:pt-8"
       >
-        <div className="relative mx-auto w-full max-w-[64rem] px-5 md:px-9">
+        <div className="wrap relative">
           <ProductDetail product={product} mode="page" onBack={() => (window.history.length > 1 ? router.back() : router.push(href("/catalog/")))} />
         </div>
       </section>
 
+      <section className="wrap pt-6 md:pt-12">
+        <ProductAbout product={product} />
+      </section>
+
       {related.length > 0 && (
-        <section className="wrap pb-4 pt-10 md:pt-14" aria-labelledby="related">
+        <section className="wrap pb-20 pt-14 md:pb-10 md:pt-20" aria-labelledby="related">
           <h2 id="related" className="section-title">
             {t.product.related}
           </h2>

@@ -7,6 +7,7 @@ import { useSite } from "@/lib/site";
 import { tr, type Lang } from "@/lib/i18n";
 import { useFilters, useProducts, type ProductQuery } from "@/lib/api";
 import { useMedia } from "@/lib/local";
+import { formatPrice } from "@/lib/format";
 import { lockScroll } from "@/lib/scroll-lock";
 import { ProductGrid } from "@/components/ProductGrid";
 import { Chips } from "@/views/HomeView";
@@ -40,7 +41,9 @@ export function CatalogView() {
   const { t, lang, categories, findCategory, href, store, ready } = useSite();
   const params = useSearchParams();
   const router = useRouter();
-  const [sheet, setSheet] = useState(false);
+  const desk = useMedia("(min-width: 1024px)");
+  const [sheetWanted, setSheet] = useState(false);
+  const sheet = sheetWanted && !desk;
 
   const c = params.get("c") ?? "all";
   const q = params.get("q") ?? "";
@@ -114,18 +117,22 @@ export function CatalogView() {
       {chips.length > 2 && <Chips chips={chips} value={top?.id ?? "all"} onChange={pickCategory} id="catalog" />}
       {subChips && <Chips chips={subChips} value={c} onChange={pickCategory} id="catalog-sub" />}
 
-      <div className="mt-4 flex items-center gap-2">
-        <button type="button" onClick={() => setSheet(true)} className="chip">
+      <div className={`mt-6 ${desk ? "catalog-split" : ""}`}>
+        {/* desktop: the filters stay on the left; phones and tablets open them as a sheet */}
+        {desk && (
+          <aside className="catalog-side" aria-label={t.catalog.filters}>
+            <h2 className="mb-4 text-[1.05rem] font-semibold tracking-[-0.02em]">{t.catalog.filters}</h2>
+            <Filters key={`${min}-${max}`} filters={filters?.attributes ?? []} chosen={attrs} stockOnly={stockOnly} min={min} max={max} onChange={set} />
+          </aside>
+        )}
+
+        <div className="min-w-0">
+      <div className="flex items-center gap-2">
+        <button type="button" onClick={() => setSheet(true)} className="chip lg:hidden">
           <IconFilter />
           {t.catalog.filters}
           {activeFilters > 0 && <span className="num grid h-5 min-w-5 place-items-center rounded-full bg-ink px-1 text-[0.7rem] font-bold text-paper">{activeFilters}</span>}
         </button>
-        {q && (
-          <button type="button" onClick={() => set({ q: null })} className="chip">
-            {q}
-            <IconClose size={14} />
-          </button>
-        )}
         <label className="relative ml-auto">
           <span className="sr-only">{t.catalog.sort}</span>
           <select
@@ -144,7 +151,9 @@ export function CatalogView() {
         </label>
       </div>
 
-      <div className="mt-7">
+      <ActiveFilters filters={filters?.attributes ?? []} chosen={attrs} q={q} stockOnly={stockOnly} min={min} max={max} onChange={set} />
+
+      <div className="mt-6">
         {!firstLoad && items.length === 0 ? (
           <div className="grid place-items-center rounded-[24px] bg-paper-2 px-6 py-16 text-center [animation:rise_.5s_var(--curve)]">
             <div>
@@ -161,12 +170,14 @@ export function CatalogView() {
       </div>
 
       {items.length > 0 && items.length < total && (
-        <div className="mt-8 text-center">
+        <div className="mt-10 text-center">
           <button type="button" className="pill pill-line" disabled={loading} onClick={() => setMore({ key: queryKey, pages: pages + 1 })}>
             {t.catalog.more(total - items.length)}
           </button>
         </div>
       )}
+        </div>
+      </div>
 
       <FilterSheet
         open={sheet}
@@ -191,6 +202,45 @@ type FilterProps = {
   max: number;
   onChange: (p: Record<string, string | string[] | null>) => void;
 };
+
+/** What narrows the list right now, each removable with one tap. */
+function ActiveFilters({ filters, chosen, q, stockOnly, min, max, onChange }: FilterProps & { q: string }) {
+  const { t, lang, ctx } = useSite();
+  const pills: { id: string; label: string; hex?: string; drop: Record<string, string | string[] | null> }[] = [];
+  if (q) pills.push({ id: "q", label: `“${q}”`, drop: { q: null } });
+  for (const [key, values] of Object.entries(chosen)) {
+    const f = filters.find((x) => x.key === key);
+    for (const v of values) {
+      const rest = Object.entries({ ...chosen, [key]: values.filter((x) => x !== v) }).flatMap(([k, vs]) => vs.map((x) => `${k}:${x}`));
+      pills.push({
+        id: `${key}:${v}`,
+        label: !f ? v : f.type === "boolean" ? `${filterText(f, lang, ctx.main)}: ${v === "1" ? t.product.yes : t.product.no}` : `${filterText(f, lang, ctx.main, v)}${f.unit ? ` ${f.unit}` : ""}`,
+        hex: f?.values.find((x) => x.value === v)?.hex ?? undefined,
+        drop: { f: rest },
+      });
+    }
+  }
+  if (min || max) pills.push({ id: "price", label: `${formatPrice(min * 100)} – ${max ? formatPrice(max * 100) : "…"}`, drop: { min: null, max: null } });
+  if (stockOnly) pills.push({ id: "stock", label: t.catalog.inStockOnly, drop: { stock: null } });
+  if (!pills.length) return null;
+
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-1.5">
+      {pills.map((p) => (
+        <button key={p.id} type="button" className="chip chip-sm chip-on" onClick={() => onChange(p.drop)} aria-label={`${p.label} — ${t.cart.remove}`}>
+          {p.hex && <span className="size-3 rounded-full outline outline-1 -outline-offset-1 outline-[rgb(255_255_255/0.45)]" style={{ background: p.hex }} aria-hidden />}
+          <span className="num">{p.label}</span>
+          <IconClose size={13} />
+        </button>
+      ))}
+      {pills.length > 1 && (
+        <button type="button" className="link-draw ml-2 text-[0.84rem] font-semibold" onClick={() => onChange({ q: null, f: null, stock: null, min: null, max: null })}>
+          {t.catalog.reset}
+        </button>
+      )}
+    </div>
+  );
+}
 
 function FilterSheet({ open, onClose, count, ...f }: FilterProps & { open: boolean; onClose: () => void; count: number }) {
   const { t } = useSite();

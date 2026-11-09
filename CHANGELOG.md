@@ -4,6 +4,15 @@ Versiya nömrəsi admin panelin **Hesab** bölməsində görünür. Yeniləmək 
 
 Format: [Keep a Changelog](https://keepachangelog.com/), versiyalar [SemVer](https://semver.org/).
 
+## [1.5.0] — 2026-11-09
+
+### Dəyişdi (görünüş)
+- Kataloq: kompüterdə filtrlər solda daimi paneldədir (telefonda əvvəlki kimi aşağıdan açılan pəncərə); seçilmiş filtrlər siyahının üstündə çip kimi görünür, hər biri bir toxunuşla silinir, “Sıfırla” hamısını təmizləyir.
+- Məhsul səhifəsi: kompüterdə şəkil sütunu sürüşərkən yerində qalır, altında kiçik şəkillər (toxunanda o şəklə keçir).
+- Ölçü / yaddaş kimi seçimlər çərçivəli düymələrdir, seçilən qalın xətlə göstərilir.
+- “Səbətə at” düyməsi ekrandan çıxanda aşağıda nazik panel görünür: məhsul, seçilmiş variant, qiymət və düymə.
+- Təsvir və xüsusiyyətlər cədvəli səhifənin altında tam enində, iki sütunda.
+
 ## [1.4.0] — 2026-11-09
 
 ### Dəyişdi (görünüş)

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { useSite } from "@/lib/site";
 import { useCart } from "@/lib/cart";
@@ -57,8 +57,27 @@ export function ProductDetail({
   const sparkRef = useRef<HTMLSpanElement>(null);
   const heartRef = useRef<HTMLButtonElement>(null);
   const okTimer = useRef(0);
+  const track = useRef<HTMLDivElement>(null);
+  const page = mode === "page";
+  // the page's buy bar shows once the real button has scrolled away above
+  const [bar, setBar] = useState(false);
+  useEffect(() => {
+    const el = addRef.current;
+    if (!page || !el) return;
+    const io = new IntersectionObserver(([e]) => setBar(!e.isIntersecting && e.boundingClientRect.top < 0));
+    io.observe(el);
+    return () => io.disconnect();
+  }, [page]);
+  const goTo = (i: number) => {
+    const el = track.current;
+    if (el) el.scrollTo({ left: i * el.clientWidth, behavior: stillness() ? "auto" : "smooth" });
+  };
 
   const variant = findVariant(product, chosen);
+  const variantText = product.options
+    .map((o) => tr(o.values.find((v) => v.id === chosen[o.id])?.name, lang))
+    .filter(Boolean)
+    .join(" / ");
   const stock = variant?.stock ?? 0;
   const canBuy = !!variant && stock > 0;
   const max = Math.max(1, Math.min(20, stock));
@@ -105,10 +124,12 @@ export function ProductDetail({
         </div>
       </div>
 
-      <div className="mt-4 md:grid md:grid-cols-[1.15fr_1fr] md:items-start md:gap-10">
+      <div className={`mt-4 md:grid md:items-start md:gap-10 ${page ? "md:grid-cols-[1.25fr_1fr] lg:gap-14" : "md:grid-cols-[1.15fr_1fr]"}`}>
+        <div className={page ? "md:sticky md:top-20" : undefined}>
         {/* hero: the flight lands here, then swipe for more photos */}
         <div ref={refs?.hero} className="detail-hero" data-shared>
           <div
+            ref={track}
             className="detail-hero-track"
             onScroll={(e) => {
               const el = e.currentTarget;
@@ -128,6 +149,16 @@ export function ProductDetail({
               ))}
             </div>
           )}
+        </div>
+        {page && product.images.length > 1 && (
+          <div className="detail-thumbs no-scrollbar" role="group" aria-label={name}>
+            {product.images.map((src, i) => (
+              <button key={src} type="button" className="detail-thumb" aria-current={i === slide || undefined} aria-label={`${i + 1} / ${product.images.length}`} onClick={() => goTo(i)}>
+                <ProductImage product={product} src={product.thumbs?.[i] ?? src} size="thumb" />
+              </button>
+            ))}
+          </div>
+        )}
         </div>
 
         <div>
@@ -268,24 +299,73 @@ export function ProductDetail({
             </button>
           </div>
 
-          <div className="ent mt-6 pb-4">
-            <p className="detail-desc text-[0.95rem]">{tr(product.description, lang)}</p>
-            {product.specs.length > 0 && (
-              <dl className="mt-5">
-                {product.specs.map((s) => (
-                  <div key={tr(s.name, "az")} className="grid grid-cols-[minmax(7rem,42%)_1fr] gap-4 border-t py-3 text-[0.92rem]">
-                    <dt className="text-[var(--t-dim)]">{tr(s.name, lang)}</dt>
-                    <dd className="num font-bold">{tr(s.value, lang)}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-          </div>
+          {!page && (
+            <div className="ent mt-6 pb-4">
+              <p className="detail-desc text-[0.95rem]">{tr(product.description, lang)}</p>
+              <Specs product={product} />
+            </div>
+          )}
         </div>
       </div>
+      {page && (
+        <div className="buybar" data-on={bar || undefined} aria-hidden={!bar} inert={!bar}>
+          <div className="buybar-in">
+            <span className="buybar-pic frame frame-thumb" aria-hidden>
+              <ProductImage product={product} size="thumb" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <b className="block truncate text-[0.92rem] font-semibold tracking-[-0.015em]">{name}</b>
+              <span className="block truncate text-[0.8rem] text-ink-soft">
+                {[variantText, variant ? formatPrice(variant.price) : ""].filter(Boolean).join(" · ")}
+              </span>
+            </span>
+            <button type="button" className="pill pill-ink buybar-btn" onClick={addToCart} disabled={!canBuy}>
+              {ok ? t.product.added : canBuy ? t.product.addToCart : t.product.outOfStock}
+            </button>
+          </div>
+        </div>
+      )}
       {mode === "overlay" && !stillness() && (
         <p className="sr-only">{t.product.swipeBack}</p>
       )}
     </div>
+  );
+}
+
+/** The long description and the specs table; the page shows them full width below the buy column. */
+export function ProductAbout({ product }: { product: Product }) {
+  const { t, lang } = useSite();
+  const text = tr(product.description, lang);
+  if (!text && !product.specs.length) return null;
+  return (
+    <div className="about-grid">
+      {text && (
+        <section aria-labelledby="about-desc">
+          <h2 id="about-desc" className="section-title">{t.product.description}</h2>
+          <p className="mt-4 whitespace-pre-line text-[1.02rem] leading-[1.65] text-ink-soft">{text}</p>
+        </section>
+      )}
+      {product.specs.length > 0 && (
+        <section aria-labelledby="about-specs">
+          <h2 id="about-specs" className="section-title">{t.product.specs}</h2>
+          <Specs product={product} />
+        </section>
+      )}
+    </div>
+  );
+}
+
+function Specs({ product }: { product: Product }) {
+  const { lang } = useSite();
+  if (!product.specs.length) return null;
+  return (
+    <dl className="specs">
+      {product.specs.map((s) => (
+        <div key={tr(s.name, "az")}>
+          <dt>{tr(s.name, lang)}</dt>
+          <dd className="num">{tr(s.value, lang)}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }

@@ -805,21 +805,21 @@ input[type="search"]::-webkit-search-cancel-button {
   }
   .seg {
     position: relative;
-    display: inline-flex;
+    display: flex;
     flex-wrap: wrap;
-    gap: 2px;
-    padding: 4px;
-    border-radius: 999px;
-    background: var(--t-soft);
+    gap: 8px;
   }
   .seg-btn {
     position: relative;
-    height: 38px;
-    padding: 0 15px;
-    border-radius: 999px;
-    font-size: 0.88rem;
+    min-width: 4.5rem;
+    height: 46px;
+    padding: 0 18px;
+    border-radius: 14px;
+    font-size: 0.9rem;
     font-weight: 600;
-    color: var(--t-dim);
+    color: var(--t-ink);
+    outline: 1px solid var(--t-line);
+    outline-offset: -1px;
     isolation: isolate;
     transition:
       color 0.2s,
@@ -841,9 +841,13 @@ input[type="search"]::-webkit-search-cancel-button {
     inset: 0;
     z-index: -1;
     border-radius: inherit;
-    background: var(--paper);
-    outline: 1px solid var(--ink-line);
-    outline-offset: -1px;
+    outline: 2px solid var(--t-ink);
+    outline-offset: -2px;
+  }
+  @media (hover: hover) {
+    .seg-btn:hover {
+      outline-color: var(--ink-line-2);
+    }
   }
   .swatches {
     display: flex;
@@ -901,8 +905,164 @@ input[type="search"]::-webkit-search-cancel-button {
   .t-orb .badge {
     outline-color: var(--t);
   }
-  .detail dl > div {
-    border-color: var(--t-line);
+  /* page: small pictures under the hero, tap to jump */
+  .detail-thumbs {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    overflow-x: auto;
+  }
+  .detail-thumb {
+    flex: 0 0 64px;
+    height: 64px;
+    border-radius: 14px;
+    background: var(--tile);
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    transition: outline-color 0.2s;
+    outline: 2px solid transparent;
+    outline-offset: -2px;
+  }
+  .detail-thumb[aria-current] {
+    outline-color: var(--ink);
+  }
+  .detail-thumb .pic {
+    max-width: 78%;
+    max-height: 78%;
+  }
+  .specs {
+    margin-top: 1.25rem;
+  }
+  .specs > div {
+    display: grid;
+    grid-template-columns: minmax(7rem, 42%) 1fr;
+    gap: 1rem;
+    padding: 0.85rem 0;
+    border-top: 1px solid var(--ink-line);
+    font-size: 0.94rem;
+  }
+  .specs > div:last-child {
+    border-bottom: 1px solid var(--ink-line);
+  }
+  .specs dt {
+    color: var(--ink-soft);
+  }
+  .specs dd {
+    font-weight: 600;
+  }
+  .about-grid {
+    display: grid;
+    gap: 3rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--ink-line);
+  }
+  @media (min-width: 900px) {
+    .about-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+    }
+  }
+
+  /* page: a slim bar with the price and the button once the real one is gone */
+  .buybar {
+    position: fixed;
+    z-index: 60;
+    left: 10px;
+    right: 10px;
+    bottom: calc(max(12px, env(safe-area-inset-bottom)) + 68px);
+    transform: translate3d(0, 16px, 0);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform 0.45s var(--curve),
+      opacity 0.25s;
+  }
+  .buybar[data-on] {
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .buybar-in {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 8px 8px 8px;
+    border-radius: 22px;
+    background: var(--glass);
+    backdrop-filter: blur(18px) saturate(1.6);
+    -webkit-backdrop-filter: blur(18px) saturate(1.6);
+    outline: 1px solid var(--ink-line);
+    outline-offset: -1px;
+  }
+  .buybar-pic {
+    flex: none;
+    width: 44px !important;
+    height: 44px;
+    border-radius: 12px !important;
+  }
+  .buybar-btn {
+    flex: none;
+    height: 44px !important;
+    padding: 0 1.1rem !important;
+    font-size: 0.88rem !important;
+  }
+  @media (min-width: 768px) {
+    .buybar {
+      left: 0;
+      right: 0;
+      bottom: 0;
+      transform: translate3d(0, 100%, 0);
+    }
+    .buybar-in {
+      max-width: 76rem;
+      margin-inline: auto;
+      padding: 10px 2rem;
+      border-radius: 0;
+      outline: none;
+    }
+    .buybar::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: var(--glass);
+      backdrop-filter: blur(18px) saturate(1.6);
+      -webkit-backdrop-filter: blur(18px) saturate(1.6);
+      border-top: 1px solid var(--ink-line);
+    }
+    .buybar-in {
+      background: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
+
+  /* catalogue: filters on the left on a desktop */
+  .catalog-split {
+    display: grid;
+    grid-template-columns: 14.5rem minmax(0, 1fr);
+    align-items: start;
+    gap: 2.75rem;
+  }
+  .catalog-side {
+    position: sticky;
+    top: 5rem;
+    max-height: calc(100dvh - 6rem);
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    padding-bottom: 1rem;
+  }
+  .catalog-split .grid-products {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  html[data-layout="list"] .catalog-split .grid-products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .chip-on {
+    background: var(--ink);
+    color: var(--paper);
   }
   /* while the shared photo / title / price fly, their real copies wait unseen */
   .detail[data-flying] [data-shared] {
